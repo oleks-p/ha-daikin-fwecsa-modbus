@@ -1,0 +1,576 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "How is the fancoil connected?",
+        "description": "The integration reads the unit. Writes stay off unless you turn them on in its options. RS-485 allows one master: if the heat pump or a wall panel shares this bus, put a gateway such as mbusd in front of it and connect every integration through the gateway.",
+        "menu_options": {
+          "network": "Network gateway (e.g. mbusd)",
+          "serial": "USB / RS-485 adapter"
+        }
+      },
+      "serial": {
+        "title": "RS-485 adapter",
+        "description": "Terminals A/B/GND on the I/O board, 8N1. Prefer a /dev/serial/by-id path: it survives reboots and replugging. Use a network gateway instead if anything else polls this bus.",
+        "data": {
+          "serial_port": "Serial port",
+          "baudrate": "Baud rate",
+          "slave": "Modbus address",
+          "entity_prefix": "Entity ID prefix"
+        },
+        "data_description": {
+          "slave": "Set on the unit: PRG → Networks and connections (password 20) → SETUP RS485 → Serial address. MST/SLV must be \"Slave from SPV\" and Protocol \"Modbus\".",
+          "entity_prefix": "Every entity id starts with it, e.g. climate.fancoil and sensor.fancoil_room_temperature."
+        }
+      },
+      "network": {
+        "title": "Network gateway",
+        "description": "A Modbus gateway on the fancoil's RS-485 bus. mbusd and most gateways speak Modbus TCP; choose RTU over TCP only for a transparent serial server.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "transport": "Gateway type",
+          "slave": "Modbus address",
+          "entity_prefix": "Entity ID prefix"
+        },
+        "data_description": {
+          "slave": "Set on the unit: PRG → Networks and connections (password 20) → SETUP RS485 → Serial address. MST/SLV must be \"Slave from SPV\" and Protocol \"Modbus\".",
+          "entity_prefix": "Every entity id starts with it, e.g. climate.fancoil and sensor.fancoil_room_temperature."
+        }
+      },
+      "reconfigure": {
+        "title": "Change the connection",
+        "description": "Same unit, different link. Entity ids and history are kept.",
+        "menu_options": {
+          "reconfigure_network": "Network gateway (e.g. mbusd)",
+          "reconfigure_serial": "USB / RS-485 adapter"
+        }
+      },
+      "reconfigure_serial": {
+        "title": "RS-485 adapter",
+        "description": "Terminals A/B/GND on the I/O board, 8N1. Prefer a /dev/serial/by-id path: it survives reboots and replugging. Use a network gateway instead if anything else polls this bus.",
+        "data": {
+          "serial_port": "Serial port",
+          "baudrate": "Baud rate",
+          "slave": "Modbus address"
+        },
+        "data_description": {
+          "slave": "Set on the unit: PRG → Networks and connections (password 20) → SETUP RS485 → Serial address. MST/SLV must be \"Slave from SPV\" and Protocol \"Modbus\"."
+        }
+      },
+      "reconfigure_network": {
+        "title": "Network gateway",
+        "description": "A Modbus gateway on the fancoil's RS-485 bus. mbusd and most gateways speak Modbus TCP; choose RTU over TCP only for a transparent serial server.",
+        "data": {
+          "host": "Host",
+          "port": "Port",
+          "transport": "Gateway type",
+          "slave": "Modbus address"
+        },
+        "data_description": {
+          "slave": "Set on the unit: PRG → Networks and connections (password 20) → SETUP RS485 → Serial address. MST/SLV must be \"Slave from SPV\" and Protocol \"Modbus\"."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "No answer from the unit. Check the address and baud rate, and that the unit is powered and set to \"Slave from SPV\".",
+      "not_fwecsa": "Something answered at that address, but not like an FWECSA.",
+      "invalid_prefix": "Use lowercase letters, digits and underscores only.",
+      "prefix_in_use": "Another fancoil already uses this prefix."
+    },
+    "abort": {
+      "already_configured": "This fancoil is already configured.",
+      "reconfigure_successful": "The connection was changed."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Fancoil options",
+        "data": {
+          "unavailable_after": "Unavailable after",
+          "allow_writes": "Allow writes",
+          "switching": "Summer/winter switching on the unit"
+        },
+        "data_description": {
+          "unavailable_after": "How long the link may fail before entities show as unavailable. The last values are shown until then.",
+          "allow_writes": "Off: read only. On: the coils and holding registers become switches, numbers and a select, and the climate entity can switch the unit and set its target. Every write is read back.",
+          "switching": "Must match the unit's parameter \"Switching Summer/Winter\" (PRG → configuration menu, password 10). It decides which setpoint the climate entity writes and whether it can choose heating or cooling."
+        }
+      }
+    }
+  },
+  "selector": {
+    "framing": {
+      "options": {
+        "tcp": "Modbus TCP gateway (e.g. mbusd)",
+        "rtu_over_tcp": "Transparent serial server (RTU over TCP)"
+      }
+    },
+    "switching": {
+      "options": {
+        "keyboard": "From keyboard/serial (factory default)",
+        "digital_input": "From digital input",
+        "auto_water": "Auto on water temperature",
+        "auto_air": "Auto on air temperature"
+      }
+    },
+    "table": {
+      "options": {
+        "coil": "Coils",
+        "discrete": "Discrete inputs",
+        "holding": "Holding registers",
+        "input": "Input registers"
+      }
+    }
+  },
+  "services": {
+    "read_registers": {
+      "name": "Read registers",
+      "description": "Reads raw values from one Modbus table through the integration's own connection, for research and support. Without an address it reads the whole table as the manual lists it. Only reads, never writes. Admin only.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Fancoil",
+          "description": "Which unit, if more than one is configured."
+        },
+        "table": {
+          "name": "Table",
+          "description": "Which Modbus table to read."
+        },
+        "address": {
+          "name": "Address",
+          "description": "First address, from 0 (the manual's number minus one)."
+        },
+        "count": {
+          "name": "Count",
+          "description": "How many values to read from the address."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "room_temperature": {
+        "name": "Room temperature"
+      },
+      "room_humidity": {
+        "name": "Room humidity"
+      },
+      "water_temperature": {
+        "name": "Water temperature"
+      },
+      "hot_water_temperature": {
+        "name": "Hot water temperature"
+      },
+      "fan_status": {
+        "name": "Fan",
+        "state": {
+          "off": "Off",
+          "extra_low": "Extra low",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        }
+      },
+      "modulating_fan_output": {
+        "name": "Modulating fan output"
+      },
+      "analog_output_1": {
+        "name": "Analog output 1"
+      },
+      "analog_output_2": {
+        "name": "Analog output 2"
+      },
+      "analog_output_3": {
+        "name": "Analog output 3"
+      },
+      "active_setpoint": {
+        "name": "Setpoint in use"
+      },
+      "cooling_setpoint_status": {
+        "name": "Cooling setpoint (status)"
+      },
+      "heating_setpoint_status": {
+        "name": "Heating setpoint (status)"
+      },
+      "single_setpoint_status": {
+        "name": "Single setpoint (status)"
+      },
+      "active_humidity_setpoint": {
+        "name": "Humidity setpoint in use"
+      },
+      "valve_type": {
+        "name": "Valve type",
+        "state": {
+          "none": "None",
+          "on_off": "On/off",
+          "modulating": "Modulating"
+        }
+      },
+      "cooling_setpoint": {
+        "name": "Cooling setpoint"
+      },
+      "cooling_setpoint_min": {
+        "name": "Cooling setpoint minimum"
+      },
+      "cooling_setpoint_max": {
+        "name": "Cooling setpoint maximum"
+      },
+      "heating_setpoint": {
+        "name": "Heating setpoint"
+      },
+      "heating_setpoint_min": {
+        "name": "Heating setpoint minimum"
+      },
+      "heating_setpoint_max": {
+        "name": "Heating setpoint maximum"
+      },
+      "single_setpoint": {
+        "name": "Single setpoint"
+      },
+      "humidity_setpoint": {
+        "name": "Humidity setpoint"
+      },
+      "humidity_setpoint_min": {
+        "name": "Humidity setpoint minimum"
+      },
+      "humidity_setpoint_max": {
+        "name": "Humidity setpoint maximum"
+      },
+      "fan_speed": {
+        "name": "Fan speed",
+        "state": {
+          "extra_low": "Extra low",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "auto": "Auto"
+        }
+      },
+      "modulating_fan_speed": {
+        "name": "Modulating fan speed"
+      },
+      "last_successful_read": {
+        "name": "Last successful read"
+      },
+      "read_failures": {
+        "name": "Read failures"
+      }
+    },
+    "binary_sensor": {
+      "unit_on": {
+        "name": "Unit on"
+      },
+      "winter": {
+        "name": "Winter (heating)"
+      },
+      "economy_on": {
+        "name": "Economy active"
+      },
+      "anti_freeze_on": {
+        "name": "Anti-freeze active"
+      },
+      "alarm": {
+        "name": "Alarm"
+      },
+      "room_probe_alarm": {
+        "name": "Room probe alarm"
+      },
+      "water_probe_alarm": {
+        "name": "Water probe alarm"
+      },
+      "hot_water_probe_alarm": {
+        "name": "Hot water probe alarm"
+      },
+      "humidity_probe_alarm": {
+        "name": "Humidity probe alarm"
+      },
+      "four_speeds": {
+        "name": "Four-speed unit"
+      },
+      "four_pipes": {
+        "name": "Four-pipe unit"
+      },
+      "modulating_fan": {
+        "name": "Modulating fan"
+      },
+      "board_probe": {
+        "name": "Air probe on the board"
+      },
+      "heaters_installed": {
+        "name": "Electric heaters fitted"
+      },
+      "humidity_probe_installed": {
+        "name": "Humidity probe fitted"
+      },
+      "output_1": {
+        "name": "Output O1"
+      },
+      "output_2": {
+        "name": "Output O2"
+      },
+      "output_3": {
+        "name": "Output O3"
+      },
+      "output_4": {
+        "name": "Output O4"
+      },
+      "output_5": {
+        "name": "Output O5"
+      },
+      "output_6": {
+        "name": "Output O6"
+      },
+      "output_7": {
+        "name": "Output O7"
+      },
+      "water_probe_present": {
+        "name": "Water probe fitted"
+      },
+      "hot_water_probe_present": {
+        "name": "Hot water probe fitted"
+      },
+      "dehumidifying": {
+        "name": "Dehumidifying"
+      },
+      "valve_open": {
+        "name": "Valve"
+      },
+      "off_by_contact": {
+        "name": "Off by remote contact"
+      },
+      "fan_auto_mode": {
+        "name": "Automatic fan"
+      },
+      "heater_on": {
+        "name": "Heater"
+      },
+      "valve_present": {
+        "name": "Valve fitted"
+      },
+      "economy_by_contact": {
+        "name": "Economy from contact"
+      },
+      "power": {
+        "name": "Power (command)"
+      },
+      "winter_mode": {
+        "name": "Winter mode (heating) (command)"
+      },
+      "economy": {
+        "name": "Economy (command)"
+      },
+      "anti_freeze": {
+        "name": "Anti-freeze (command)"
+      },
+      "electric_heater": {
+        "name": "Electric heater (command)"
+      },
+      "modulating_fan_auto": {
+        "name": "Modulating fan auto (command)"
+      },
+      "master_power": {
+        "name": "On/off from master (command)"
+      },
+      "master_economy": {
+        "name": "Economy from master (command)"
+      },
+      "master_winter_mode": {
+        "name": "Summer/winter from master (command)"
+      },
+      "master_anti_freeze": {
+        "name": "Anti-freeze from master (command)"
+      },
+      "master_electric_heater": {
+        "name": "Electric heaters from master (command)"
+      },
+      "master_setpoint": {
+        "name": "Setpoint from master (command)"
+      },
+      "master_setpoint_limits": {
+        "name": "Setpoint limits from master (command)"
+      },
+      "master_fan_speed": {
+        "name": "Fan speed from master (command)"
+      },
+      "keyboard_lock": {
+        "name": "Keyboard lock (command)"
+      },
+      "master_humidity": {
+        "name": "Humidity control from master (command)"
+      },
+      "humidity_control": {
+        "name": "Humidity control (command)"
+      },
+      "output_7_command": {
+        "name": "Output O7 (command)"
+      }
+    },
+    "switch": {
+      "power": {
+        "name": "Power"
+      },
+      "winter_mode": {
+        "name": "Winter mode (heating)"
+      },
+      "economy": {
+        "name": "Economy"
+      },
+      "anti_freeze": {
+        "name": "Anti-freeze"
+      },
+      "electric_heater": {
+        "name": "Electric heater"
+      },
+      "modulating_fan_auto": {
+        "name": "Modulating fan auto"
+      },
+      "master_power": {
+        "name": "On/off from master"
+      },
+      "master_economy": {
+        "name": "Economy from master"
+      },
+      "master_winter_mode": {
+        "name": "Summer/winter from master"
+      },
+      "master_anti_freeze": {
+        "name": "Anti-freeze from master"
+      },
+      "master_electric_heater": {
+        "name": "Electric heaters from master"
+      },
+      "master_setpoint": {
+        "name": "Setpoint from master"
+      },
+      "master_setpoint_limits": {
+        "name": "Setpoint limits from master"
+      },
+      "master_fan_speed": {
+        "name": "Fan speed from master"
+      },
+      "keyboard_lock": {
+        "name": "Keyboard lock"
+      },
+      "master_humidity": {
+        "name": "Humidity control from master"
+      },
+      "humidity_control": {
+        "name": "Humidity control"
+      },
+      "output_7_command": {
+        "name": "Output O7"
+      }
+    },
+    "number": {
+      "cooling_setpoint": {
+        "name": "Cooling setpoint"
+      },
+      "cooling_setpoint_min": {
+        "name": "Cooling setpoint minimum"
+      },
+      "cooling_setpoint_max": {
+        "name": "Cooling setpoint maximum"
+      },
+      "heating_setpoint": {
+        "name": "Heating setpoint"
+      },
+      "heating_setpoint_min": {
+        "name": "Heating setpoint minimum"
+      },
+      "heating_setpoint_max": {
+        "name": "Heating setpoint maximum"
+      },
+      "single_setpoint": {
+        "name": "Single setpoint"
+      },
+      "humidity_setpoint": {
+        "name": "Humidity setpoint"
+      },
+      "humidity_setpoint_min": {
+        "name": "Humidity setpoint minimum"
+      },
+      "humidity_setpoint_max": {
+        "name": "Humidity setpoint maximum"
+      },
+      "modulating_fan_speed": {
+        "name": "Modulating fan speed"
+      }
+    },
+    "select": {
+      "fan_speed": {
+        "name": "Fan speed",
+        "state": {
+          "extra_low": "Extra low",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "auto": "Auto"
+        }
+      }
+    },
+    "climate": {
+      "fancoil": {
+        "name": "Fancoil",
+        "state_attributes": {
+          "fan_mode": {
+            "state": {
+              "extra_low": "Extra low",
+              "low": "Low",
+              "medium": "Medium",
+              "high": "High",
+              "auto": "Auto"
+            }
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "writes_disabled": {
+      "message": "Writes are off for this fancoil. Turn on \"Allow writes\" in its options first."
+    },
+    "not_writable": {
+      "message": "{key} cannot be written."
+    },
+    "out_of_range": {
+      "message": "{value} is outside {minimum} to {maximum} in steps of {step} for {key}."
+    },
+    "rate_limited": {
+      "message": "Too many writes: {key} can be written once every {interval} s, and the unit {daily} times a day."
+    },
+    "write_not_applied": {
+      "message": "The fancoil did not apply {key}: wrote {expected}, it reads {actual}."
+    },
+    "write_not_applied_consent": {
+      "message": "The fancoil did not apply {key}: wrote {expected}, it reads {actual}. {consent} is off; the unit may take {key} from Modbus only with it on."
+    },
+    "write_failed": {
+      "message": "No answer from the fancoil while writing: {error}"
+    },
+    "write_refused": {
+      "message": "The fancoil refused the write (Modbus exception {code})."
+    },
+    "read_failed": {
+      "message": "No answer from the fancoil while reading: {error}"
+    },
+    "choose_entry": {
+      "message": "Choose which fancoil: none or more than one is loaded."
+    },
+    "cannot_connect": {
+      "message": "No answer from the FWECSA at {endpoint}."
+    },
+    "not_fwecsa": {
+      "message": "Modbus address {slave} does not answer like an FWECSA."
+    },
+    "no_season": {
+      "message": "The unit has not reported summer or winter yet, so it is not known which setpoint to write."
+    },
+    "hvac_mode_unavailable": {
+      "message": "{mode} is not available with the unit's summer/winter switching as set in the options."
+    },
+    "fan_mode_unavailable": {
+      "message": "Fan speed {mode} is not available on this unit."
+    }
+  }
+}

@@ -1,0 +1,29 @@
+# A dev Home Assistant against a simulated FWECSA -- no hardware needed.
+#
+#   docker compose up -d
+#   open http://localhost:8123, onboard, then add "Daikin FWECSA fancoil":
+#   Network gateway -> host "sim", port 5020, "Modbus TCP gateway", address 1.
+#
+# The simulator answers like the reference bus: the unit behind mbusd.
+# The Home Assistant release the tests pin.
+services:
+  sim:
+    image: python:3.14-slim
+    working_dir: /repo
+    command: >-
+      python3 -u tools/sim_fwecsa.py --fixture tests/fixtures/fwecsa_reference.json
+      --listen 0.0.0.0:5020
+    volumes:
+      - .:/repo:ro
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:2026.8.2
+    ports:
+      - "8123:8123"
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./dev-config:/config
+      - ./custom_components:/config/custom_components:ro
+    depends_on:
+      - sim

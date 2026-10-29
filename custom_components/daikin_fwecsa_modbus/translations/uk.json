@@ -1,0 +1,576 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Як під'єднано фанкойл?",
+        "description": "Інтеграція зчитує блок. Запис вимкнено, доки ви не ввімкнете його в параметрах. На RS-485 може бути лише один майстер: якщо цю шину ділять тепловий насос чи настінна панель, поставте шлюз (напр. mbusd) і під'єднуйте всі інтеграції через нього.",
+        "menu_options": {
+          "network": "Мережевий шлюз (напр. mbusd)",
+          "serial": "Адаптер USB / RS-485"
+        }
+      },
+      "serial": {
+        "title": "Адаптер RS-485",
+        "description": "Клеми A/B/GND на платі вводу-виводу, 8N1. Краще шлях /dev/serial/by-id: він не змінюється після перезавантаження. Якщо цю шину опитує ще щось, використайте мережевий шлюз.",
+        "data": {
+          "serial_port": "Послідовний порт",
+          "baudrate": "Швидкість",
+          "slave": "Адреса Modbus",
+          "entity_prefix": "Префікс ідентифікаторів сутностей"
+        },
+        "data_description": {
+          "slave": "Задається на блоці: PRG → Мережі та з'єднання (пароль 20) → SETUP RS485 → Серійна адреса. MST/SLV має бути \"Slave from SPV\", протокол — \"Modbus\".",
+          "entity_prefix": "З нього починається кожен ідентифікатор сутності, наприклад climate.fancoil і sensor.fancoil_room_temperature."
+        }
+      },
+      "network": {
+        "title": "Мережевий шлюз",
+        "description": "Шлюз Modbus на шині RS-485 фанкойла. mbusd і більшість шлюзів працюють як Modbus TCP; RTU over TCP — лише для прозорого послідовного сервера.",
+        "data": {
+          "host": "Хост",
+          "port": "Порт",
+          "transport": "Тип шлюзу",
+          "slave": "Адреса Modbus",
+          "entity_prefix": "Префікс ідентифікаторів сутностей"
+        },
+        "data_description": {
+          "slave": "Задається на блоці: PRG → Мережі та з'єднання (пароль 20) → SETUP RS485 → Серійна адреса. MST/SLV має бути \"Slave from SPV\", протокол — \"Modbus\".",
+          "entity_prefix": "З нього починається кожен ідентифікатор сутності, наприклад climate.fancoil і sensor.fancoil_room_temperature."
+        }
+      },
+      "reconfigure": {
+        "title": "Змінити з'єднання",
+        "description": "Той самий блок, інше з'єднання. Ідентифікатори та історія сутностей зберігаються.",
+        "menu_options": {
+          "reconfigure_network": "Мережевий шлюз (напр. mbusd)",
+          "reconfigure_serial": "Адаптер USB / RS-485"
+        }
+      },
+      "reconfigure_serial": {
+        "title": "Адаптер RS-485",
+        "description": "Клеми A/B/GND на платі вводу-виводу, 8N1. Краще шлях /dev/serial/by-id: він не змінюється після перезавантаження. Якщо цю шину опитує ще щось, використайте мережевий шлюз.",
+        "data": {
+          "serial_port": "Послідовний порт",
+          "baudrate": "Швидкість",
+          "slave": "Адреса Modbus"
+        },
+        "data_description": {
+          "slave": "Задається на блоці: PRG → Мережі та з'єднання (пароль 20) → SETUP RS485 → Серійна адреса. MST/SLV має бути \"Slave from SPV\", протокол — \"Modbus\"."
+        }
+      },
+      "reconfigure_network": {
+        "title": "Мережевий шлюз",
+        "description": "Шлюз Modbus на шині RS-485 фанкойла. mbusd і більшість шлюзів працюють як Modbus TCP; RTU over TCP — лише для прозорого послідовного сервера.",
+        "data": {
+          "host": "Хост",
+          "port": "Порт",
+          "transport": "Тип шлюзу",
+          "slave": "Адреса Modbus"
+        },
+        "data_description": {
+          "slave": "Задається на блоці: PRG → Мережі та з'єднання (пароль 20) → SETUP RS485 → Серійна адреса. MST/SLV має бути \"Slave from SPV\", протокол — \"Modbus\"."
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Блок не відповідає. Перевірте адресу й швидкість, живлення блока і що він налаштований як \"Slave from SPV\".",
+      "not_fwecsa": "За цією адресою щось відповіло, але не як FWECSA.",
+      "invalid_prefix": "Лише малі латинські літери, цифри та підкреслення.",
+      "prefix_in_use": "Цей префікс уже використовує інший фанкойл."
+    },
+    "abort": {
+      "already_configured": "Цей фанкойл уже налаштовано.",
+      "reconfigure_successful": "З'єднання змінено."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Параметри фанкойла",
+        "data": {
+          "unavailable_after": "Недоступний через",
+          "allow_writes": "Дозволити запис",
+          "switching": "Перемикання літо/зима на блоці"
+        },
+        "data_description": {
+          "unavailable_after": "Скільки часу зв'язок може не працювати, перш ніж сутності стануть недоступними. До того показуються останні значення.",
+          "allow_writes": "Вимкнено: лише зчитування. Увімкнено: котушки та регістри зберігання стають перемикачами, числами й списком, а клімат може вмикати блок і задавати уставку. Кожен запис перевіряється зчитуванням.",
+          "switching": "Має збігатися з параметром блока \"Switching Summer/Winter\" (PRG → меню конфігурації, пароль 10). Від нього залежить, яку уставку записує клімат і чи може він обирати опалення або охолодження."
+        }
+      }
+    }
+  },
+  "selector": {
+    "framing": {
+      "options": {
+        "tcp": "Шлюз Modbus TCP (напр. mbusd)",
+        "rtu_over_tcp": "Прозорий послідовний сервер (RTU over TCP)"
+      }
+    },
+    "switching": {
+      "options": {
+        "keyboard": "З клавіатури/послідовного порту (заводське)",
+        "digital_input": "Від цифрового входу",
+        "auto_water": "Авто за температурою води",
+        "auto_air": "Авто за температурою повітря"
+      }
+    },
+    "table": {
+      "options": {
+        "coil": "Котушки",
+        "discrete": "Дискретні входи",
+        "holding": "Регістри зберігання",
+        "input": "Вхідні регістри"
+      }
+    }
+  },
+  "services": {
+    "read_registers": {
+      "name": "Зчитати регістри",
+      "description": "Зчитує сирі значення з однієї таблиці Modbus через з'єднання інтеграції, для досліджень і підтримки. Без адреси зчитує всю таблицю, як у посібнику. Лише зчитує, ніколи не записує. Тільки для адміністратора.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Фанкойл",
+          "description": "Який блок, якщо налаштовано кілька."
+        },
+        "table": {
+          "name": "Таблиця",
+          "description": "Яку таблицю Modbus зчитати."
+        },
+        "address": {
+          "name": "Адреса",
+          "description": "Перша адреса, від 0 (номер у посібнику мінус один)."
+        },
+        "count": {
+          "name": "Кількість",
+          "description": "Скільки значень зчитати від адреси."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "room_temperature": {
+        "name": "Температура в приміщенні"
+      },
+      "room_humidity": {
+        "name": "Вологість у приміщенні"
+      },
+      "water_temperature": {
+        "name": "Температура води"
+      },
+      "hot_water_temperature": {
+        "name": "Температура гарячої води"
+      },
+      "fan_status": {
+        "name": "Вентилятор",
+        "state": {
+          "off": "Вимкнено",
+          "extra_low": "Наднизька",
+          "low": "Низька",
+          "medium": "Середня",
+          "high": "Висока"
+        }
+      },
+      "modulating_fan_output": {
+        "name": "Вихід модульованого вентилятора"
+      },
+      "analog_output_1": {
+        "name": "Аналоговий вихід 1"
+      },
+      "analog_output_2": {
+        "name": "Аналоговий вихід 2"
+      },
+      "analog_output_3": {
+        "name": "Аналоговий вихід 3"
+      },
+      "active_setpoint": {
+        "name": "Активна уставка"
+      },
+      "cooling_setpoint_status": {
+        "name": "Уставка охолодження (стан)"
+      },
+      "heating_setpoint_status": {
+        "name": "Уставка опалення (стан)"
+      },
+      "single_setpoint_status": {
+        "name": "Єдина уставка (стан)"
+      },
+      "active_humidity_setpoint": {
+        "name": "Активна уставка вологості"
+      },
+      "valve_type": {
+        "name": "Тип клапана",
+        "state": {
+          "none": "Немає",
+          "on_off": "Двопозиційний",
+          "modulating": "Модулюючий"
+        }
+      },
+      "cooling_setpoint": {
+        "name": "Уставка охолодження"
+      },
+      "cooling_setpoint_min": {
+        "name": "Мінімум уставки охолодження"
+      },
+      "cooling_setpoint_max": {
+        "name": "Максимум уставки охолодження"
+      },
+      "heating_setpoint": {
+        "name": "Уставка опалення"
+      },
+      "heating_setpoint_min": {
+        "name": "Мінімум уставки опалення"
+      },
+      "heating_setpoint_max": {
+        "name": "Максимум уставки опалення"
+      },
+      "single_setpoint": {
+        "name": "Єдина уставка"
+      },
+      "humidity_setpoint": {
+        "name": "Уставка вологості"
+      },
+      "humidity_setpoint_min": {
+        "name": "Мінімум уставки вологості"
+      },
+      "humidity_setpoint_max": {
+        "name": "Максимум уставки вологості"
+      },
+      "fan_speed": {
+        "name": "Швидкість вентилятора",
+        "state": {
+          "extra_low": "Наднизька",
+          "low": "Низька",
+          "medium": "Середня",
+          "high": "Висока",
+          "auto": "Авто"
+        }
+      },
+      "modulating_fan_speed": {
+        "name": "Швидкість модульованого вентилятора"
+      },
+      "last_successful_read": {
+        "name": "Останнє успішне зчитування"
+      },
+      "read_failures": {
+        "name": "Помилки зчитування"
+      }
+    },
+    "binary_sensor": {
+      "unit_on": {
+        "name": "Блок увімкнено"
+      },
+      "winter": {
+        "name": "Зима (опалення)"
+      },
+      "economy_on": {
+        "name": "Економ активний"
+      },
+      "anti_freeze_on": {
+        "name": "Антизамерзання активне"
+      },
+      "alarm": {
+        "name": "Аварія"
+      },
+      "room_probe_alarm": {
+        "name": "Аварія датчика приміщення"
+      },
+      "water_probe_alarm": {
+        "name": "Аварія датчика води"
+      },
+      "hot_water_probe_alarm": {
+        "name": "Аварія датчика гарячої води"
+      },
+      "humidity_probe_alarm": {
+        "name": "Аварія датчика вологості"
+      },
+      "four_speeds": {
+        "name": "Чотиришвидкісний блок"
+      },
+      "four_pipes": {
+        "name": "Чотиритрубний блок"
+      },
+      "modulating_fan": {
+        "name": "Модульований вентилятор"
+      },
+      "board_probe": {
+        "name": "Датчик повітря на платі"
+      },
+      "heaters_installed": {
+        "name": "Електронагрівачі встановлено"
+      },
+      "humidity_probe_installed": {
+        "name": "Датчик вологості встановлено"
+      },
+      "output_1": {
+        "name": "Вихід O1"
+      },
+      "output_2": {
+        "name": "Вихід O2"
+      },
+      "output_3": {
+        "name": "Вихід O3"
+      },
+      "output_4": {
+        "name": "Вихід O4"
+      },
+      "output_5": {
+        "name": "Вихід O5"
+      },
+      "output_6": {
+        "name": "Вихід O6"
+      },
+      "output_7": {
+        "name": "Вихід O7"
+      },
+      "water_probe_present": {
+        "name": "Датчик води встановлено"
+      },
+      "hot_water_probe_present": {
+        "name": "Датчик гарячої води встановлено"
+      },
+      "dehumidifying": {
+        "name": "Осушення"
+      },
+      "valve_open": {
+        "name": "Клапан"
+      },
+      "off_by_contact": {
+        "name": "Вимкнено віддаленим контактом"
+      },
+      "fan_auto_mode": {
+        "name": "Автоматичний вентилятор"
+      },
+      "heater_on": {
+        "name": "Нагрівач"
+      },
+      "valve_present": {
+        "name": "Клапан встановлено"
+      },
+      "economy_by_contact": {
+        "name": "Економ від контакту"
+      },
+      "power": {
+        "name": "Живлення (команда)"
+      },
+      "winter_mode": {
+        "name": "Зимовий режим (опалення) (команда)"
+      },
+      "economy": {
+        "name": "Економ (команда)"
+      },
+      "anti_freeze": {
+        "name": "Антизамерзання (команда)"
+      },
+      "electric_heater": {
+        "name": "Електронагрівач (команда)"
+      },
+      "modulating_fan_auto": {
+        "name": "Авто модульованого вентилятора (команда)"
+      },
+      "master_power": {
+        "name": "Увімкнення від майстра (команда)"
+      },
+      "master_economy": {
+        "name": "Економ від майстра (команда)"
+      },
+      "master_winter_mode": {
+        "name": "Літо/зима від майстра (команда)"
+      },
+      "master_anti_freeze": {
+        "name": "Антизамерзання від майстра (команда)"
+      },
+      "master_electric_heater": {
+        "name": "Електронагрівачі від майстра (команда)"
+      },
+      "master_setpoint": {
+        "name": "Уставка від майстра (команда)"
+      },
+      "master_setpoint_limits": {
+        "name": "Межі уставки від майстра (команда)"
+      },
+      "master_fan_speed": {
+        "name": "Швидкість вентилятора від майстра (команда)"
+      },
+      "keyboard_lock": {
+        "name": "Блокування клавіатури (команда)"
+      },
+      "master_humidity": {
+        "name": "Контроль вологості від майстра (команда)"
+      },
+      "humidity_control": {
+        "name": "Контроль вологості (команда)"
+      },
+      "output_7_command": {
+        "name": "Вихід O7 (команда)"
+      }
+    },
+    "switch": {
+      "power": {
+        "name": "Живлення"
+      },
+      "winter_mode": {
+        "name": "Зимовий режим (опалення)"
+      },
+      "economy": {
+        "name": "Економ"
+      },
+      "anti_freeze": {
+        "name": "Антизамерзання"
+      },
+      "electric_heater": {
+        "name": "Електронагрівач"
+      },
+      "modulating_fan_auto": {
+        "name": "Авто модульованого вентилятора"
+      },
+      "master_power": {
+        "name": "Увімкнення від майстра"
+      },
+      "master_economy": {
+        "name": "Економ від майстра"
+      },
+      "master_winter_mode": {
+        "name": "Літо/зима від майстра"
+      },
+      "master_anti_freeze": {
+        "name": "Антизамерзання від майстра"
+      },
+      "master_electric_heater": {
+        "name": "Електронагрівачі від майстра"
+      },
+      "master_setpoint": {
+        "name": "Уставка від майстра"
+      },
+      "master_setpoint_limits": {
+        "name": "Межі уставки від майстра"
+      },
+      "master_fan_speed": {
+        "name": "Швидкість вентилятора від майстра"
+      },
+      "keyboard_lock": {
+        "name": "Блокування клавіатури"
+      },
+      "master_humidity": {
+        "name": "Контроль вологості від майстра"
+      },
+      "humidity_control": {
+        "name": "Контроль вологості"
+      },
+      "output_7_command": {
+        "name": "Вихід O7"
+      }
+    },
+    "number": {
+      "cooling_setpoint": {
+        "name": "Уставка охолодження"
+      },
+      "cooling_setpoint_min": {
+        "name": "Мінімум уставки охолодження"
+      },
+      "cooling_setpoint_max": {
+        "name": "Максимум уставки охолодження"
+      },
+      "heating_setpoint": {
+        "name": "Уставка опалення"
+      },
+      "heating_setpoint_min": {
+        "name": "Мінімум уставки опалення"
+      },
+      "heating_setpoint_max": {
+        "name": "Максимум уставки опалення"
+      },
+      "single_setpoint": {
+        "name": "Єдина уставка"
+      },
+      "humidity_setpoint": {
+        "name": "Уставка вологості"
+      },
+      "humidity_setpoint_min": {
+        "name": "Мінімум уставки вологості"
+      },
+      "humidity_setpoint_max": {
+        "name": "Максимум уставки вологості"
+      },
+      "modulating_fan_speed": {
+        "name": "Швидкість модульованого вентилятора"
+      }
+    },
+    "select": {
+      "fan_speed": {
+        "name": "Швидкість вентилятора",
+        "state": {
+          "extra_low": "Наднизька",
+          "low": "Низька",
+          "medium": "Середня",
+          "high": "Висока",
+          "auto": "Авто"
+        }
+      }
+    },
+    "climate": {
+      "fancoil": {
+        "name": "Фанкойл",
+        "state_attributes": {
+          "fan_mode": {
+            "state": {
+              "extra_low": "Наднизька",
+              "low": "Низька",
+              "medium": "Середня",
+              "high": "Висока",
+              "auto": "Авто"
+            }
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "writes_disabled": {
+      "message": "Запис для цього фанкойла вимкнено. Спершу увімкніть \"Дозволити запис\" у параметрах."
+    },
+    "not_writable": {
+      "message": "{key} не можна записати."
+    },
+    "out_of_range": {
+      "message": "{value} поза межами від {minimum} до {maximum} з кроком {step} для {key}."
+    },
+    "rate_limited": {
+      "message": "Забагато записів: {key} можна записувати раз на {interval} с, а блок — {daily} разів на добу."
+    },
+    "write_not_applied": {
+      "message": "Фанкойл не застосував {key}: записано {expected}, зчитано {actual}."
+    },
+    "write_not_applied_consent": {
+      "message": "Фанкойл не застосував {key}: записано {expected}, зчитано {actual}. {consent} вимкнено; блок може приймати {key} через Modbus лише з ним увімкненим."
+    },
+    "write_failed": {
+      "message": "Фанкойл не відповів під час запису: {error}"
+    },
+    "write_refused": {
+      "message": "Фанкойл відхилив запис (виняток Modbus {code})."
+    },
+    "read_failed": {
+      "message": "Фанкойл не відповів під час зчитування: {error}"
+    },
+    "choose_entry": {
+      "message": "Оберіть фанкойл: не завантажено жодного або більше одного."
+    },
+    "cannot_connect": {
+      "message": "FWECSA за адресою {endpoint} не відповідає."
+    },
+    "not_fwecsa": {
+      "message": "Адреса Modbus {slave} відповідає не як FWECSA."
+    },
+    "no_season": {
+      "message": "Блок ще не повідомив літо чи зиму, тож невідомо, яку уставку записувати."
+    },
+    "hvac_mode_unavailable": {
+      "message": "Режим {mode} недоступний за перемиканням літо/зима, вказаним у параметрах."
+    },
+    "fan_mode_unavailable": {
+      "message": "Швидкість вентилятора {mode} недоступна на цьому блоці."
+    }
+  }
+}

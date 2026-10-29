@@ -1,0 +1,10 @@
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.venv/
+*.py[cod]
+*.tmp
+dev-config/
+.idea/
+# Daikin's manual is theirs: cite it (FC66003946 Rev 00), never commit it.
+*.pdf

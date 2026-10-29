@@ -1,0 +1,28 @@
+# Changelog
+
+## 0.1.0 — 2026-10-29
+
+First release: every variable in the FWECSA manual (FC66003946 Rev 00) as an
+entity, read-only by default.
+
+- **Reads** all four tables, one request each, every 10 s: 18 coils, 31
+  discrete inputs, 12 holding registers, 15 input registers. A table the unit
+  refuses to read whole is read one value at a time from then on.
+- **Climate entity** from the unit's own status: on/off, heating or cooling,
+  room temperature and humidity, the setpoint in use, and what it is doing.
+- **Writes (opt-in):** a switch per coil, a number per holding register, the
+  fan speed as a select, and the climate entity's commands. FC15/FC16 only;
+  each write is skipped if already so, read back, rate limited, and an
+  unapplied one names its consent coil when that is off.
+- **Summer/winter switching** option, mirroring the unit's parameter: it picks
+  the setpoint register the climate entity writes and the modes it offers.
+- **Links:** USB/RS-485 adapter, Modbus TCP gateway (mbusd), or RTU over TCP.
+  Entries on one link share one serialised bus. Reconfigure changes the link in
+  place.
+- **Support:** diagnostics with raw values, an admin `read_registers` action,
+  a read-only probe (`tools/probe_fwecsa.py`) and a simulator
+  (`tools/sim_fwecsa.py`). English and Ukrainian.
+
+Verified on the reference unit (FWB15CTV, slave 1, behind mbusd): addressing,
+temperature scale, summer/winter polarity. Not yet: humidity and percentage
+scales, the two-way configuration bits, the consent coils' effect.

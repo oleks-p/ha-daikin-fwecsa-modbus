@@ -1,0 +1,39 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Home Assistant 2026.8 requires Python 3.14.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: pip install -r requirements_test.txt
+      - run: ruff check custom_components tools tests
+      - run: pytest -q
+
+  tools:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The probe and the simulator run on the Home Assistant host, which may
+      # have only Python 3.11: run them there, against each other.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install "pymodbus>=3.6,<4"
+      - name: Probe the simulator
+        run: |
+          python3 tools/sim_fwecsa.py --fixture tests/fixtures/fwecsa_reference.json \
+            --listen 127.0.0.1:5020 &
+          sleep 2
+          python3 tools/probe_fwecsa.py --tcp 127.0.0.1:5020 -o capture.json
+          python3 -c "import json; c = json.load(open('capture.json')); \
+            f = json.load(open('tests/fixtures/fwecsa_reference.json')); \
+            assert c['tables'] == f['tables'], c['tables']"
