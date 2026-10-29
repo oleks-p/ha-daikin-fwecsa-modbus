@@ -22,6 +22,8 @@ entity, read-only by default.
 - **Support:** diagnostics with raw values, an admin `read_registers` action,
   a read-only probe (`tools/probe_fwecsa.py`) and a simulator
   (`tools/sim_fwecsa.py`). English and Ukrainian.
+- **Icon:** Daikin's mark in `brand/` (256 and 512 px, transparent), so the
+  integrations page and HACS show it.
 
 Verified on the reference unit (FWB15CTV, slave 1, behind mbusd): addressing,
 temperature scale, summer/winter polarity. Not yet: humidity and percentage

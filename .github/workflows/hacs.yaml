@@ -14,5 +14,3 @@ jobs:
       - uses: hacs/action@main
         with:
           category: integration
-          # No icon ships: Daikin's mark is Daikin's, and this is not their product.
-          ignore: brands
