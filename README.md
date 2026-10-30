@@ -15,8 +15,8 @@ Not affiliated with Daikin.
 
 ## Status
 
-The integration is built from the manual (FC66003946 Rev 00) and checked against the
-reference unit (an FWB15CTV, slave 1, behind mbusd), which [the probe](#probe)
+The integration is built from the manual (FC66003946 Rev 00) and checked
+against the reference unit (an FWB15CTV, slave 1, behind mbusd), which [the probe](#probe)
 read in full on 2026-10-30 (`tests/fixtures/fwecsa_capture.json`; the tests run
 the integration against it). Confirmed there:
 
@@ -48,13 +48,16 @@ Not yet checked on a unit:
   temperature, fan speed (step fans) and the Economy preset.
 - **Sensors** for every input register and, read-only, every holding register:
   room, water and hot-water temperature, fan status, setpoints and their limits,
-  fan speed, modulating fan and analogue outputs, valve type.
-- **Binary sensors** for every discrete input — unit on, winter, economy,
+  fan speed, modulating fan and analogue outputs, valve type. The mode — the
+  manual's summer/winter — is a sensor too, heating or cooling: the mode in use
+  (`sensor.fancoil_mode_in_use`) and the command (`sensor.fancoil_mode`).
+- **Binary sensors** for every other discrete input — unit on, economy,
   anti-freeze, the alarm and each probe alarm, valve open, dehumidifying,
   heater, outputs O1–O7, and how the unit is built (speeds, pipes, fan type,
-  probes, heaters, valve) — and, read-only, every coil.
+  probes, heaters, valve) — and, read-only, every other coil.
 - **With *Allow writes*:** a switch per coil, a number per holding register,
-  and the fan speed as a select.
+  and two selects: the mode (`select.fancoil_mode`, heating or cooling) and the
+  fan speed.
 - **Link health:** last successful read and read failures. Short outages keep
   the last values; entities go unavailable after 60 s without an answer
   (configurable).

@@ -16,6 +16,7 @@ from homeassistant.config_entries import ConfigEntry, ConfigEntryState
 from homeassistant.core import HomeAssistant, ServiceCall, ServiceResponse, SupportsResponse
 from homeassistant.exceptions import ConfigEntryError, ConfigEntryNotReady, ServiceValidationError
 from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.service import async_register_admin_service
 from homeassistant.helpers.typing import ConfigType
 from homeassistant.util.hass_dict import HassKey
@@ -81,6 +82,19 @@ def _target_entry(hass: HomeAssistant, entry_id: str | None) -> FwecsaConfigEntr
     return loaded[0]
 
 
+#: Entity keys 0.1.2 retired: the winter switch and inputs became the mode select
+#: and sensors, under new ids. Left in the registry, they would sit unavailable.
+RETIRED_KEYS = ("winter", "winter_mode", "master_winter_mode")
+
+
+def _remove_retired(hass: HomeAssistant, entry: FwecsaConfigEntry) -> None:
+    registry = er.async_get(hass)
+    prefix = f"{entry.entry_id}_"
+    for item in er.async_entries_for_config_entry(registry, entry.entry_id):
+        if item.unique_id.removeprefix(prefix) in RETIRED_KEYS:
+            registry.async_remove(item.entity_id)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: FwecsaConfigEntry) -> bool:
     """Read the unit's configuration, then start polling it."""
     endpoint = Endpoint.from_config(entry.data)
@@ -105,6 +119,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: FwecsaConfigEntry) -> bo
         await registry.release(endpoint)
         raise
     entry.runtime_data = FwecsaRuntime(endpoint, bus, coordinator)
+    _remove_retired(hass, entry)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 

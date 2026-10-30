@@ -207,6 +207,20 @@
           "modulating": "Modulating"
         }
       },
+      "mode_in_use": {
+        "name": "Mode in use",
+        "state": {
+          "heating": "Heating",
+          "cooling": "Cooling"
+        }
+      },
+      "mode": {
+        "name": "Mode (command)",
+        "state": {
+          "heating": "Heating",
+          "cooling": "Cooling"
+        }
+      },
       "cooling_setpoint": {
         "name": "Cooling setpoint"
       },
@@ -260,9 +274,6 @@
     "binary_sensor": {
       "unit_on": {
         "name": "Unit on"
-      },
-      "winter": {
-        "name": "Winter (heating)"
       },
       "economy_on": {
         "name": "Economy active"
@@ -354,9 +365,6 @@
       "power": {
         "name": "Power (command)"
       },
-      "winter_mode": {
-        "name": "Winter mode (heating) (command)"
-      },
       "economy": {
         "name": "Economy (command)"
       },
@@ -375,8 +383,8 @@
       "master_economy": {
         "name": "Economy from master (command)"
       },
-      "master_winter_mode": {
-        "name": "Summer/winter from master (command)"
+      "master_mode": {
+        "name": "Mode from master (command)"
       },
       "master_anti_freeze": {
         "name": "Anti-freeze from master (command)"
@@ -410,9 +418,6 @@
       "power": {
         "name": "Power"
       },
-      "winter_mode": {
-        "name": "Winter mode (heating)"
-      },
       "economy": {
         "name": "Economy"
       },
@@ -431,8 +436,8 @@
       "master_economy": {
         "name": "Economy from master"
       },
-      "master_winter_mode": {
-        "name": "Summer/winter from master"
+      "master_mode": {
+        "name": "Mode from master"
       },
       "master_anti_freeze": {
         "name": "Anti-freeze from master"
@@ -498,6 +503,13 @@
       }
     },
     "select": {
+      "mode": {
+        "name": "Mode",
+        "state": {
+          "heating": "Heating",
+          "cooling": "Cooling"
+        }
+      },
       "fan_speed": {
         "name": "Fan speed",
         "state": {
@@ -564,7 +576,7 @@
       "message": "Modbus address {slave} does not answer like an FWECSA."
     },
     "no_season": {
-      "message": "The unit has not reported summer or winter yet, so it is not known which setpoint to write."
+      "message": "The unit has not reported heating or cooling yet, so it is not known which setpoint to write."
     },
     "hvac_mode_unavailable": {
       "message": "{mode} is not available with the unit's summer/winter switching as set in the options."

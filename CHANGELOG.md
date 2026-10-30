@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.2 — 2026-10-30
+
+- **Mode, not winter:** coil 1 and discrete input 1, the manual's
+  summer/winter, are now named for what they do. With writes on, the
+  "Winter mode (heating)" switch is a select, `select.fancoil_mode`: Heating or
+  Cooling. The status is a sensor, `sensor.fancoil_mode_in_use`, and the command
+  read-only is `sensor.fancoil_mode`. The consent is "Mode from master"
+  (`switch.fancoil_master_mode`).
+- **Upgrading from 0.1.x:** the old entities (`switch.fancoil_winter_mode`,
+  `binary_sensor.fancoil_winter`, `binary_sensor.fancoil_winter_mode`,
+  `*.fancoil_master_winter_mode`) are removed from the registry. Automations
+  that used them need the new ids: `switch.turn_on` on the winter switch becomes
+  `select.select_option` with `heating`.
+
 ## 0.1.1 — 2026-10-30
 
 - **Probed:** the reference unit read in full on 2026-10-30, kept as

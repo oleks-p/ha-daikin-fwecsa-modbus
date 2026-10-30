@@ -38,6 +38,20 @@ async def test_a_switch_writes_a_coil(hass, fake, writes_on, setup_integration):
     assert hass.states.get("switch.fancoil_keyboard_lock").state == "on"
 
 
+async def test_the_mode_is_a_select_on_coil_1(hass, fake, writes_on, setup_integration):
+    state = hass.states.get("select.fancoil_mode")
+    assert (state.state, state.attributes["options"]) == ("heating", ["heating", "cooling"])
+    await hass.services.async_call("select", "select_option",
+                                   {"entity_id": "select.fancoil_mode", "option": "cooling"},
+                                   blocking=True)
+    await hass.async_block_till_done()
+    assert [w[1:] for w in fake.writes] == [("coil", 1, 0)]
+    assert hass.states.get("select.fancoil_mode").state == "cooling"
+    # With keyboard switching the unit follows the command.
+    assert hass.states.get("sensor.fancoil_mode_in_use").state == "cooling"
+    assert hass.states.get("climate.fancoil").state == "cool"
+
+
 async def test_the_same_value_is_not_written(hass, fake, writes_on, setup_integration):
     await _gate(setup_integration).async_write("single_setpoint", 23.0)
     await _gate(setup_integration).async_write("power", 1)

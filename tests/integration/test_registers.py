@@ -14,6 +14,7 @@ from custom_components.daikin_fwecsa_modbus.registers import (
     WRITE_SPECS,
     Table,
 )
+from custom_components.daikin_fwecsa_modbus.select import SELECTS
 from custom_components.daikin_fwecsa_modbus.sensor import SENSORS
 from custom_components.daikin_fwecsa_modbus.switch import SWITCHES
 
@@ -44,9 +45,11 @@ def test_every_register_has_an_entity():
 def test_every_writable_register_has_a_writable_entity():
     writable = {r.key for r in REGISTERS if r.table.writable}
     assert set(WRITE_SPECS) == writable
-    assert {d.key for d in SWITCHES} == {r.key for r in REGISTERS if r.table is Table.COIL}
-    assert {d.key for d in NUMBERS} | {"fan_speed"} == {
-        r.key for r in REGISTERS if r.table is Table.HOLDING}
+    # Each on the platform its WriteSpec names: the mode and the fan speed are selects.
+    for platform, descriptions in (("switch", SWITCHES), ("number", NUMBERS),
+                                   ("select", SELECTS)):
+        assert {d.key for d in descriptions} == {
+            key for key, spec in WRITE_SPECS.items() if spec.platform == platform}
 
 
 def test_consent_names_a_master_coil():

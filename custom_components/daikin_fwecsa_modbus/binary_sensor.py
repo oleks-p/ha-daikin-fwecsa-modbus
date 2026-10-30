@@ -1,7 +1,8 @@
 """Binary sensors: every discrete input, and every coil read-only.
 
 The coils are here as well as on the switch platform so their state is visible
-with writes off. They are diagnostic: what the unit is actually doing is in the
+with writes off -- all but coil 1, the mode, which is a sensor like its status
+input: heating or cooling says more than on or off. They are diagnostic: what the unit is actually doing is in the
 discrete inputs ("unit on", "economy active"), which also follow the keyboard,
 the time slots and the remote contacts.
 """
@@ -21,7 +22,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import FwecsaConfigEntry
 from .entity import FwecsaEntity, FwecsaEntityDescription, value
-from .registers import COILS
+from .registers import COILS, ENUMS
 
 DIAGNOSTIC = EntityCategory.DIAGNOSTIC
 PROBLEM = BinarySensorDeviceClass.PROBLEM
@@ -58,7 +59,6 @@ def _config(key: str) -> FwecsaBinaryDescription:
 BINARY_SENSORS: tuple[FwecsaBinaryDescription, ...] = (
     # -- discrete inputs ------------------------------------------------------
     _bit("unit_on", device_class=BinarySensorDeviceClass.POWER),
-    _bit("winter"),
     _bit("economy_on"),
     _bit("anti_freeze_on"),
     _bit("alarm", device_class=PROBLEM),
@@ -83,7 +83,7 @@ BINARY_SENSORS: tuple[FwecsaBinaryDescription, ...] = (
     _config("valve_present"),
     _config("economy_by_contact"),
     # -- coils, read-only -------------------------------------------------------
-    *(_bit(reg.key, entity_category=DIAGNOSTIC) for reg in COILS),
+    *(_bit(reg.key, entity_category=DIAGNOSTIC) for reg in COILS if reg.key not in ENUMS),
 )
 
 

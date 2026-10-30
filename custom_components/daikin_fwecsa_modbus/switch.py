@@ -1,4 +1,5 @@
-"""Every coil as a switch -- only with "allow writes" on.
+"""Every coil as a switch -- only with "allow writes" on. Coil 1, the mode, is a
+select instead (select.py).
 
 Writes go out as FC15 and are read back (writes.py). The state shown is the
 coil as the unit reads it back; what the unit is doing as a result is in the
@@ -18,12 +19,12 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from . import FwecsaConfigEntry
 from .binary_sensor import FEATURES
 from .entity import FwecsaEntity, FwecsaEntityDescription, remove_stale, value
-from .registers import COILS
+from .registers import COILS, WRITE_SPECS
 
 PARALLEL_UPDATES = 1  # one write at a time: they share one bus
 
 #: Everyday controls; the rest are set once, on a service page.
-PRIMARY = {"power", "winter_mode", "economy"}
+PRIMARY = {"power", "economy"}
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -39,6 +40,7 @@ SWITCHES: tuple[FwecsaSwitchDescription, ...] = tuple(
         feature=FEATURES.get(reg.key),
     )
     for reg in COILS
+    if WRITE_SPECS[reg.key].platform == "switch"
 )
 
 

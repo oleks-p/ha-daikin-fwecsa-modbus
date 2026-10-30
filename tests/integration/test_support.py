@@ -16,7 +16,7 @@ from pytest_homeassistant_custom_component.components.diagnostics import (
 from custom_components.daikin_fwecsa_modbus.binary_sensor import BINARY_SENSORS
 from custom_components.daikin_fwecsa_modbus.const import DOMAIN
 from custom_components.daikin_fwecsa_modbus.number import NUMBERS
-from custom_components.daikin_fwecsa_modbus.select import FAN_SPEED
+from custom_components.daikin_fwecsa_modbus.select import SELECTS
 from custom_components.daikin_fwecsa_modbus.sensor import SENSORS
 from custom_components.daikin_fwecsa_modbus.switch import SWITCHES
 
@@ -33,7 +33,7 @@ def test_generated_files_are_current(tool):
 
 @pytest.mark.parametrize(("platform", "descriptions"), [
     ("sensor", SENSORS), ("binary_sensor", BINARY_SENSORS), ("switch", SWITCHES),
-    ("number", NUMBERS), ("select", (FAN_SPEED,)),
+    ("number", NUMBERS), ("select", SELECTS),
 ])
 def test_every_entity_has_a_name(platform, descriptions):
     names = json.loads(STRINGS.read_text(encoding="utf-8"))["entity"][platform]

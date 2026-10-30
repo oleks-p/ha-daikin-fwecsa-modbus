@@ -102,8 +102,8 @@ class FwecsaClimate(FwecsaEntity, ClimateEntity):
 
     @property
     def _season_mode(self) -> HVACMode | None:
-        winter = self._values.get("winter")
-        return None if winter is None else HVACMode.HEAT if winter else HVACMode.COOL
+        heating = self._values.get("mode_in_use")
+        return None if heating is None else HVACMode.HEAT if heating else HVACMode.COOL
 
     # -- state ------------------------------------------------------------------
 
@@ -142,9 +142,9 @@ class FwecsaClimate(FwecsaEntity, ClimateEntity):
         if self._fan_running():
             if values.get("valve_present") and values.get("valve_open") is False:
                 return HVACAction.FAN
-            if values.get("winter") is None:
+            if values.get("mode_in_use") is None:
                 return None
-            return HVACAction.HEATING if values.get("winter") else HVACAction.COOLING
+            return HVACAction.HEATING if values.get("mode_in_use") else HVACAction.COOLING
         if values.get("heater_on"):
             return HVACAction.HEATING
         return HVACAction.IDLE
@@ -181,9 +181,9 @@ class FwecsaClimate(FwecsaEntity, ClimateEntity):
 
     def _limit(self, end: str, pick, fallback: float) -> float:
         """The unit's own setpoint limits for the season it is in (both, in auto)."""
-        winter = self._values.get("winter")
-        seasons = ("cooling", "heating") if self._auto or winter is None else (
-            ("heating",) if winter else ("cooling",))
+        heating = self._values.get("mode_in_use")
+        seasons = ("cooling", "heating") if self._auto or heating is None else (
+            ("heating",) if heating else ("cooling",))
         limits = [self._values.get(f"{s}_setpoint_{end}") for s in seasons]
         limits = [v for v in limits if v is not None]
         return pick(limits) if limits else fallback
@@ -216,18 +216,18 @@ class FwecsaClimate(FwecsaEntity, ClimateEntity):
 
     # -- commands ---------------------------------------------------------------
 
-    def _setpoint_key(self, winter: bool | None = None) -> str | None:
+    def _setpoint_key(self, heating: bool | None = None) -> str | None:
         """The holding register the target is written to, by the switching option.
 
-        ``winter``: the season just commanded, when it has not been read back yet.
+        ``heating``: the season just commanded, when it has not been read back yet.
         """
         if self._auto:
             return "single_setpoint"
-        if winter is None:
-            winter = self._values.get("winter")
-        if winter is None:
+        if heating is None:
+            heating = self._values.get("mode_in_use")
+        if heating is None:
             return None
-        return "heating_setpoint" if winter else "cooling_setpoint"
+        return "heating_setpoint" if heating else "cooling_setpoint"
 
     async def _write(self, key: str, value: float) -> None:
         await self.coordinator.writes.async_write(key, value, self._context)
@@ -250,7 +250,7 @@ class FwecsaClimate(FwecsaEntity, ClimateEntity):
             # The season first: switching on into the wrong one would start the
             # coil on the wrong water for a poll.
             season = hvac_mode is HVACMode.HEAT
-            await self._write("winter_mode", int(season))
+            await self._write("mode", int(season))
         await self._write("power", 1)
         return season
 

@@ -106,14 +106,14 @@ def _table(table: Table, rows: list[tuple]) -> list[Reg]:
 #: for that function whatever Modbus writes.
 COILS = _table(Table.COIL, [
     ("power", "ON/OFF controller"),
-    ("winter_mode", "SUMMER/WINTER controller"),          # 1 = winter, heating
+    ("mode", "SUMMER/WINTER controller"),                 # 1 = winter: heating
     ("economy", "ECONOMY controller"),
     ("anti_freeze", "ENABLE ANTI-FREEZE controller"),     # minimum room temperature
     ("electric_heater", "ENABLE ELECTRICAL HEATER controller"),
     ("modulating_fan_auto", "modulating ventilation MAN/AUTO controller"),
     ("master_power", "enable ON/OFF from MASTER"),
     ("master_economy", "enable ECONOMY from MASTER"),
-    ("master_winter_mode", "enable SUMMER/WINTER from MASTER"),
+    ("master_mode", "enable SUMMER/WINTER from MASTER"),
     ("master_anti_freeze", "enable ANTI-FREEZE from MASTER"),
     ("master_electric_heater", "enable ELECTRIC HEATERS from MASTER"),
     ("master_setpoint", "enable SETPOINT from MASTER"),
@@ -128,7 +128,7 @@ COILS = _table(Table.COIL, [
 #: INPUT STATUS (digital, read-only).
 DISCRETE_INPUTS = _table(Table.DISCRETE, [
     ("unit_on", "unit ON/OFF"),
-    ("winter", "SUMMER/WINTER"),                          # 1 = winter, heating
+    ("mode_in_use", "SUMMER/WINTER"),                     # 1 = winter: heating
     ("economy_on", "ECONOMY on"),
     ("anti_freeze_on", "ANTI-FREEZE on"),
     ("alarm", "ALARM installed"),                         # Italian: "presenza di ALLARME"
@@ -201,8 +201,13 @@ FAN_SPEEDS: dict[int, str] = {0: "extra_low", 1: "low", 2: "medium", 3: "high", 
 FAN_STATUSES: dict[int, str] = {0: "off", 1: "extra_low", 2: "low", 3: "medium", 4: "high"}
 #: Input 15, in the manual's order (NOT INCLUDED/ON-OFF/MODULATING).
 VALVE_TYPES: dict[int, str] = {0: "none", 1: "on_off", 2: "modulating"}
+#: Coil 1 and discrete input 1, the manual's SUMMER/WINTER, in the words the
+#: climate entity uses. Heating first, the order the select offers them in.
+MODES: dict[int, str] = {1: "heating", 0: "cooling"}
 
 ENUMS: dict[str, dict[int, str]] = {
+    "mode": MODES,
+    "mode_in_use": MODES,
     "fan_speed": FAN_SPEEDS,
     "fan_status": FAN_STATUSES,
     "valve_type": VALVE_TYPES,
@@ -228,7 +233,8 @@ def _setpoint(key: str) -> WriteSpec:
 
 
 WRITE_SPECS: dict[str, WriteSpec] = {
-    **{reg.key: WriteSpec(reg.key, "switch") for reg in COILS},
+    **{reg.key: WriteSpec(reg.key, "switch") for reg in COILS if reg.key not in ENUMS},
+    "mode": WriteSpec("mode", "select"),
     **{key: _setpoint(key) for key in (
         "cooling_setpoint", "cooling_setpoint_min", "cooling_setpoint_max",
         "heating_setpoint", "heating_setpoint_min", "heating_setpoint_max",
@@ -244,7 +250,7 @@ WRITE_SPECS: dict[str, WriteSpec] = {
 #: a dead register map: the write is acknowledged and nothing changes.
 CONSENT: dict[str, str] = {
     "power": "master_power",
-    "winter_mode": "master_winter_mode",
+    "mode": "master_mode",
     "economy": "master_economy",
     "anti_freeze": "master_anti_freeze",
     "electric_heater": "master_electric_heater",

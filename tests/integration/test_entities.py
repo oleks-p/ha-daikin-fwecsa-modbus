@@ -35,9 +35,10 @@ async def test_writes_on_adds_the_writable_platforms(hass, writes_on, setup_inte
     by_domain: dict[str, int] = {}
     for entry in entries:
         by_domain[entry.domain] = by_domain.get(entry.domain, 0) + 1
-    # 15 input + 12 holding + 2 link sensors; 31 inputs + 18 coils; one each of the rest.
-    assert by_domain == {"sensor": 29, "binary_sensor": 49, "switch": 18, "number": 11,
-                         "select": 1, "climate": 1}
+    # Sensors: 15 input, 12 holding, 2 for the mode, 2 for the link. Binary sensors:
+    # 30 inputs and 17 coils; the mode is neither, it is the 2 sensors and a select.
+    assert by_domain == {"sensor": 31, "binary_sensor": 47, "switch": 17, "number": 11,
+                         "select": 2, "climate": 1}
 
 
 @pytest.mark.parametrize(
@@ -53,7 +54,8 @@ async def test_writes_on_adds_the_writable_platforms(hass, writes_on, setup_inte
         ("sensor.fancoil_fan_status", "off"),
         ("sensor.fancoil_valve_type", "on_off"),
         ("binary_sensor.fancoil_unit_on", "on"),
-        ("binary_sensor.fancoil_winter", "on"),
+        ("sensor.fancoil_mode_in_use", "heating"),
+        ("sensor.fancoil_mode", "heating"),
         ("binary_sensor.fancoil_alarm", "off"),
         ("binary_sensor.fancoil_valve_open", "off"),
         ("binary_sensor.fancoil_water_probe_present", "on"),
@@ -73,6 +75,22 @@ async def test_parts_the_unit_lacks_start_disabled(hass, setup_integration):
         assert registry.async_get(entity_id).disabled_by is er.RegistryEntryDisabler.INTEGRATION
         assert hass.states.get(entity_id) is None
     assert registry.async_get("sensor.fancoil_water_temperature").disabled_by is None
+
+
+async def test_retired_entities_are_removed(hass, config_entry, modbus_clients, freezer):
+    # 0.1.1 made these; 0.1.2 named them anew, as the mode select and sensors.
+    registry = er.async_get(hass)
+    retired = [("switch", "winter_mode"), ("binary_sensor", "winter"),
+               ("binary_sensor", "winter_mode"), ("switch", "master_winter_mode")]
+    for domain, key in retired:
+        registry.async_get_or_create(domain, DOMAIN, f"{config_entry.entry_id}_{key}",
+                                     config_entry=config_entry,
+                                     suggested_object_id=f"fancoil_{key}")
+    assert await hass.config_entries.async_setup(config_entry.entry_id)
+    await hass.async_block_till_done()
+    for domain, key in retired:
+        assert registry.async_get(f"{domain}.fancoil_{key}") is None
+    assert hass.states.get("sensor.fancoil_mode_in_use").state == "heating"
 
 
 async def test_device(hass, setup_integration):

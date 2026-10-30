@@ -8,37 +8,37 @@ Entity ids assume the default prefix `fancoil`. The climate entity `climate.fanc
 
 ## Coils
 
-FC1 read, FC15 write. Read-only as a binary sensor; a switch with *Allow writes* on.
+FC1 read, FC15 write. Read-only as a binary sensor; a switch with *Allow writes* on. The mode: a sensor, and a select.
 
 | No. | Addr | Manual | Name | Encoding | Entities |
 |---:|---:|---|---|---|---|
-| 1 | 0 | ON/OFF controller | Power | 0/1 | `switch.fancoil_power`<br>`binary_sensor.fancoil_power` |
-| 2 | 1 | SUMMER/WINTER controller | Winter mode (heating) | 0/1 | `switch.fancoil_winter_mode`<br>`binary_sensor.fancoil_winter_mode` |
-| 3 | 2 | ECONOMY controller | Economy | 0/1 | `switch.fancoil_economy`<br>`binary_sensor.fancoil_economy` |
-| 4 | 3 | ENABLE ANTI-FREEZE controller | Anti-freeze | 0/1 | `switch.fancoil_anti_freeze`<br>`binary_sensor.fancoil_anti_freeze` |
-| 5 | 4 | ENABLE ELECTRICAL HEATER controller | Electric heater | 0/1 | `switch.fancoil_electric_heater`<br>`binary_sensor.fancoil_electric_heater` |
-| 6 | 5 | modulating ventilation MAN/AUTO controller | Modulating fan auto | 0/1 | `switch.fancoil_modulating_fan_auto`<br>`binary_sensor.fancoil_modulating_fan_auto` |
-| 7 | 6 | enable ON/OFF from MASTER | On/off from master | 0/1 | `switch.fancoil_master_power`<br>`binary_sensor.fancoil_master_power` |
-| 8 | 7 | enable ECONOMY from MASTER | Economy from master | 0/1 | `switch.fancoil_master_economy`<br>`binary_sensor.fancoil_master_economy` |
-| 9 | 8 | enable SUMMER/WINTER from MASTER | Summer/winter from master | 0/1 | `switch.fancoil_master_winter_mode`<br>`binary_sensor.fancoil_master_winter_mode` |
-| 10 | 9 | enable ANTI-FREEZE from MASTER | Anti-freeze from master | 0/1 | `switch.fancoil_master_anti_freeze`<br>`binary_sensor.fancoil_master_anti_freeze` |
-| 11 | 10 | enable ELECTRIC HEATERS from MASTER | Electric heaters from master | 0/1 | `switch.fancoil_master_electric_heater`<br>`binary_sensor.fancoil_master_electric_heater` |
-| 12 | 11 | enable SETPOINT from MASTER | Setpoint from master | 0/1 | `switch.fancoil_master_setpoint`<br>`binary_sensor.fancoil_master_setpoint` |
-| 13 | 12 | enable SETPOINT LIMITS from MASTER | Setpoint limits from master | 0/1 | `switch.fancoil_master_setpoint_limits`<br>`binary_sensor.fancoil_master_setpoint_limits` |
-| 14 | 13 | enable VENTILATION SPEED from MASTER | Fan speed from master | 0/1 | `switch.fancoil_master_fan_speed`<br>`binary_sensor.fancoil_master_fan_speed` |
-| 15 | 14 | KEYBOARD LOCK controller | Keyboard lock | 0/1 | `switch.fancoil_keyboard_lock`<br>`binary_sensor.fancoil_keyboard_lock` |
-| 16 | 15 | enable HUMIDITY CONTROL consent from MASTER | Humidity control from master | 0/1 | `switch.fancoil_master_humidity`<br>`binary_sensor.fancoil_master_humidity` |
-| 17 | 16 | enable HUMIDITY CONTROL | Humidity control | 0/1 | `switch.fancoil_humidity_control`<br>`binary_sensor.fancoil_humidity_control` |
-| 18 | 17 | control for CONFIGURABLE DIGITAL OUTPUT NO.7 | Output O7 | 0/1 | `switch.fancoil_output_7_command`<br>`binary_sensor.fancoil_output_7_command` |
+| 1 | 0 | ON/OFF controller | Power | 0/1 | `binary_sensor.fancoil_power`<br>`switch.fancoil_power` |
+| 2 | 1 | SUMMER/WINTER controller | Mode | 1 heating, 0 cooling | `sensor.fancoil_mode`<br>`select.fancoil_mode` |
+| 3 | 2 | ECONOMY controller | Economy | 0/1 | `binary_sensor.fancoil_economy`<br>`switch.fancoil_economy` |
+| 4 | 3 | ENABLE ANTI-FREEZE controller | Anti-freeze | 0/1 | `binary_sensor.fancoil_anti_freeze`<br>`switch.fancoil_anti_freeze` |
+| 5 | 4 | ENABLE ELECTRICAL HEATER controller | Electric heater | 0/1 | `binary_sensor.fancoil_electric_heater`<br>`switch.fancoil_electric_heater` |
+| 6 | 5 | modulating ventilation MAN/AUTO controller | Modulating fan auto | 0/1 | `binary_sensor.fancoil_modulating_fan_auto`<br>`switch.fancoil_modulating_fan_auto` |
+| 7 | 6 | enable ON/OFF from MASTER | On/off from master | 0/1 | `binary_sensor.fancoil_master_power`<br>`switch.fancoil_master_power` |
+| 8 | 7 | enable ECONOMY from MASTER | Economy from master | 0/1 | `binary_sensor.fancoil_master_economy`<br>`switch.fancoil_master_economy` |
+| 9 | 8 | enable SUMMER/WINTER from MASTER | Mode from master | 0/1 | `binary_sensor.fancoil_master_mode`<br>`switch.fancoil_master_mode` |
+| 10 | 9 | enable ANTI-FREEZE from MASTER | Anti-freeze from master | 0/1 | `binary_sensor.fancoil_master_anti_freeze`<br>`switch.fancoil_master_anti_freeze` |
+| 11 | 10 | enable ELECTRIC HEATERS from MASTER | Electric heaters from master | 0/1 | `binary_sensor.fancoil_master_electric_heater`<br>`switch.fancoil_master_electric_heater` |
+| 12 | 11 | enable SETPOINT from MASTER | Setpoint from master | 0/1 | `binary_sensor.fancoil_master_setpoint`<br>`switch.fancoil_master_setpoint` |
+| 13 | 12 | enable SETPOINT LIMITS from MASTER | Setpoint limits from master | 0/1 | `binary_sensor.fancoil_master_setpoint_limits`<br>`switch.fancoil_master_setpoint_limits` |
+| 14 | 13 | enable VENTILATION SPEED from MASTER | Fan speed from master | 0/1 | `binary_sensor.fancoil_master_fan_speed`<br>`switch.fancoil_master_fan_speed` |
+| 15 | 14 | KEYBOARD LOCK controller | Keyboard lock | 0/1 | `binary_sensor.fancoil_keyboard_lock`<br>`switch.fancoil_keyboard_lock` |
+| 16 | 15 | enable HUMIDITY CONTROL consent from MASTER | Humidity control from master | 0/1 | `binary_sensor.fancoil_master_humidity`<br>`switch.fancoil_master_humidity` |
+| 17 | 16 | enable HUMIDITY CONTROL | Humidity control | 0/1 | `binary_sensor.fancoil_humidity_control`<br>`switch.fancoil_humidity_control` |
+| 18 | 17 | control for CONFIGURABLE DIGITAL OUTPUT NO.7 | Output O7 | 0/1 | `binary_sensor.fancoil_output_7_command`<br>`switch.fancoil_output_7_command` |
 
 ## Discrete inputs
 
-FC2, read-only.
+FC2, read-only. A binary sensor; the mode, a sensor.
 
 | No. | Addr | Manual | Name | Encoding | Entities |
 |---:|---:|---|---|---|---|
 | 1 | 0 | unit ON/OFF | Unit on | 0/1 | `binary_sensor.fancoil_unit_on` |
-| 2 | 1 | SUMMER/WINTER | Winter (heating) | 0/1 | `binary_sensor.fancoil_winter` |
+| 2 | 1 | SUMMER/WINTER | Mode in use | 1 heating, 0 cooling | `sensor.fancoil_mode_in_use` |
 | 3 | 2 | ECONOMY on | Economy active | 0/1 | `binary_sensor.fancoil_economy_on` |
 | 4 | 3 | ANTI-FREEZE on | Anti-freeze active | 0/1 | `binary_sensor.fancoil_anti_freeze_on` |
 | 5 | 4 | ALARM installed | Alarm | 0/1 | `binary_sensor.fancoil_alarm` |

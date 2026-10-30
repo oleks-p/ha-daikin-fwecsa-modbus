@@ -1,10 +1,12 @@
-"""The step fan speed (holding 11) as a select -- only with "allow writes" on.
+"""Selects -- only with "allow writes" on.
 
-Extra-low is offered on 4-speed units only, as on the unit's own keyboard.
+The mode (coil 1): heating or cooling. The step fan speed (holding 11):
+extra-low is offered on 4-speed units only, as on the unit's own keyboard.
 """
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from homeassistant.components.select import SelectEntity, SelectEntityDescription
@@ -14,7 +16,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from . import FwecsaConfigEntry
 from .coordinator import FwecsaCoordinator
 from .entity import FwecsaEntity, FwecsaEntityDescription, remove_stale
-from .registers import FAN_SPEEDS
+from .registers import ENUMS, FAN_SPEEDS, MODES
 
 PARALLEL_UPDATES = 1
 
@@ -29,18 +31,30 @@ def fan_speeds(coordinator: FwecsaCoordinator) -> list[str]:
     return speeds
 
 
-def _current(coordinator: FwecsaCoordinator) -> str | None:
-    raw = coordinator.data.values.get("fan_speed")
-    return None if raw is None else FAN_SPEEDS.get(raw)
+def _current(key: str) -> Callable[[FwecsaCoordinator], str | None]:
+    table = ENUMS[key]
+
+    def current(coordinator: FwecsaCoordinator) -> str | None:
+        raw = coordinator.data.values.get(key)
+        return None if raw is None else table.get(raw)
+
+    return current
 
 
 @dataclass(frozen=True, kw_only=True)
 class FwecsaSelectDescription(SelectEntityDescription, FwecsaEntityDescription):
-    """The fan speed."""
+    """A coil or holding register, written as one of its named values."""
+
+    #: The options this unit offers, when that is fewer than all of them.
+    options_fn: Callable[[FwecsaCoordinator], list[str]] | None = None
 
 
-FAN_SPEED = FwecsaSelectDescription(key="fan_speed", options=list(FAN_SPEEDS.values()),
-                                    value_fn=_current, feature="step_fan")
+SELECTS: tuple[FwecsaSelectDescription, ...] = (
+    FwecsaSelectDescription(key="mode", options=list(MODES.values()), value_fn=_current("mode")),
+    FwecsaSelectDescription(key="fan_speed", options=list(FAN_SPEEDS.values()),
+                            value_fn=_current("fan_speed"), options_fn=fan_speeds,
+                            feature="step_fan"),
+)
 
 
 async def async_setup_entry(
@@ -52,21 +66,24 @@ async def async_setup_entry(
     if not coordinator.writes.allowed:
         remove_stale(hass, entry, "select")
         return
-    async_add_entities([FwecsaFanSpeed(coordinator, FAN_SPEED, "select")])
+    async_add_entities(FwecsaSelect(coordinator, d, "select") for d in SELECTS)
 
 
-class FwecsaFanSpeed(FwecsaEntity, SelectEntity):
+class FwecsaSelect(FwecsaEntity, SelectEntity):
     entity_description: FwecsaSelectDescription
 
     def __init__(self, coordinator: FwecsaCoordinator, description: FwecsaSelectDescription,
                  domain: str) -> None:
         super().__init__(coordinator, description, domain)
-        self._attr_options = fan_speeds(coordinator)
+        options_fn = description.options_fn
+        self._attr_options = options_fn(coordinator) if options_fn else list(description.options)
+        self._raw = {name: raw for raw, name in ENUMS[description.key].items()}
 
     @property
     def current_option(self) -> str | None:
         return self.entity_description.value_fn(self.coordinator)
 
     async def async_select_option(self, option: str) -> None:
-        await self.coordinator.writes.async_write("fan_speed", SPEED_RAW[option], self._context)
+        await self.coordinator.writes.async_write(self.entity_description.key,
+                                                  self._raw[option], self._context)
         await self.coordinator.async_request_refresh()

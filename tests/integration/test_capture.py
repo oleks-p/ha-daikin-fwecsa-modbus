@@ -79,8 +79,8 @@ async def test_climate(hass, auto_switching, setup_integration):
         # ... while the unit uses its lower limit in its place.
         ("sensor.fancoil_cooling_setpoint_status", "10.0"),
         # The water decides the season: the unit heats, the coil says summer.
-        ("binary_sensor.fancoil_winter", "on"),
-        ("binary_sensor.fancoil_winter_mode", "off"),
+        ("sensor.fancoil_mode_in_use", "heating"),
+        ("sensor.fancoil_mode", "cooling"),
         ("binary_sensor.fancoil_master_setpoint", "off"),
         ("binary_sensor.fancoil_fan_auto_mode", "on"),
         ("sensor.fancoil_fan_speed", "auto"),

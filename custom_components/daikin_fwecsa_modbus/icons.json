@@ -6,6 +6,10 @@
       "modulating_fan_output": {"default": "mdi:fan"},
       "modulating_fan_speed": {"default": "mdi:fan"},
       "valve_type": {"default": "mdi:valve"},
+      "mode_in_use": {"default": "mdi:sun-snowflake-variant",
+                      "state": {"heating": "mdi:fire", "cooling": "mdi:snowflake"}},
+      "mode": {"default": "mdi:sun-snowflake-variant",
+               "state": {"heating": "mdi:fire", "cooling": "mdi:snowflake"}},
       "read_failures": {"default": "mdi:lan-disconnect"}
     },
     "binary_sensor": {
@@ -17,10 +21,11 @@
     "switch": {
       "power": {"default": "mdi:power"},
       "economy": {"default": "mdi:leaf"},
-      "winter_mode": {"default": "mdi:snowflake", "state": {"on": "mdi:sun-snowflake-variant"}},
       "keyboard_lock": {"default": "mdi:lock-open-variant", "state": {"on": "mdi:lock"}}
     },
     "select": {
+      "mode": {"default": "mdi:sun-snowflake-variant",
+               "state": {"heating": "mdi:fire", "cooling": "mdi:snowflake"}},
       "fan_speed": {"default": "mdi:fan-auto"}
     }
   },

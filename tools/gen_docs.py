@@ -19,7 +19,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "docs" / "register_map.md"
 sys.path.insert(0, str(ROOT / "tools"))
 
-from gen_translations import COIL, DISCRETE, HOLDING, SENSOR  # noqa: E402
+from gen_translations import COIL, DISCRETE, HOLDING, SELECT, SENSOR  # noqa: E402
 
 
 def _registers():
@@ -33,33 +33,28 @@ def _registers():
 
 HEADINGS = {
     "coil": ("Coils", "FC1 read, FC15 write. Read-only as a binary sensor; a switch with "
-             "*Allow writes* on."),
-    "discrete": ("Discrete inputs", "FC2, read-only."),
+             "*Allow writes* on. The mode: a sensor, and a select."),
+    "discrete": ("Discrete inputs", "FC2, read-only. A binary sensor; the mode, a sensor."),
     "holding": ("Holding registers", "FC3 read, FC16 write. Read-only as a sensor; a number "
                 "(the fan speed: a select) with *Allow writes* on."),
     "input": ("Input registers", "FC4, read-only."),
 }
 
 
-def _entities(reg, prefix: str) -> str:
-    key, table = reg.key, str(reg.table)
-    if table == "coil":
-        ids = [f"switch.{prefix}_{key}", f"binary_sensor.{prefix}_{key}"]
-    elif table == "discrete":
-        ids = [f"binary_sensor.{prefix}_{key}"]
-    elif table == "holding":
-        writable = "select" if key == "fan_speed" else "number"
-        ids = [f"sensor.{prefix}_{key}", f"{writable}.{prefix}_{key}"]
-    else:
-        ids = [f"sensor.{prefix}_{key}"]
+def _entities(reg, module, prefix: str) -> str:
+    key = reg.key
+    read = "sensor" if not reg.table.bits or key in module.ENUMS else "binary_sensor"
+    ids = [f"{read}.{prefix}_{key}"]
+    if reg.table.writable:
+        ids.append(f"{module.WRITE_SPECS[key].platform}.{prefix}_{key}")
     return "<br>".join(f"`{i}`" for i in ids)
 
 
 def _encoding(reg, enums) -> str:
-    if reg.table.bits:
-        return "0/1"
     if reg.key in enums:
         return ", ".join(f"{raw} {name}" for raw, name in enums[reg.key].items())
+    if reg.table.bits:
+        return "0/1"
     if reg.scale != 1.0:
         return f"×{reg.scale:g} °C, signed"
     if reg.key.startswith(("humidity_setpoint", "active_humidity_setpoint")):
@@ -69,7 +64,7 @@ def _encoding(reg, enums) -> str:
 
 def render(prefix: str = "fancoil") -> str:
     module = _registers()
-    names = {**COIL, **DISCRETE, **HOLDING, **SENSOR}
+    names = {**COIL, **DISCRETE, **HOLDING, **SENSOR, **SELECT}
     lines = [
         "# FWECSA register map",
         "",
@@ -92,7 +87,7 @@ def render(prefix: str = "fancoil") -> str:
         for reg in (r for r in module.REGISTERS if r.table is table):
             name = names[reg.key][0]
             lines.append(f"| {reg.number} | {reg.address} | {reg.manual} | {name} | "
-                         f"{_encoding(reg, module.ENUMS)} | {_entities(reg, prefix)} |")
+                         f"{_encoding(reg, module.ENUMS)} | {_entities(reg, module, prefix)} |")
     return "\n".join(lines) + "\n"
 
 

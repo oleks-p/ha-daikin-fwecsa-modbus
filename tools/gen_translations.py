@@ -27,6 +27,10 @@ FAN_SPEED_STATES = {
     "high": ("High", "Висока"),
     "auto": ("Auto", "Авто"),
 }
+MODE_STATES = {
+    "heating": ("Heating", "Опалення"),
+    "cooling": ("Cooling", "Охолодження"),
+}
 FAN_STATUS_STATES = {
     "off": ("Off", "Вимкнено"),
     **{k: v for k, v in FAN_SPEED_STATES.items() if k != "auto"},
@@ -69,6 +73,8 @@ SENSOR = {
         "on_off": ("On/off", "Двопозиційний"),
         "modulating": ("Modulating", "Модулюючий"),
     }),
+    "mode_in_use": ("Mode in use", "Режим у роботі", MODE_STATES),
+    "mode": ("Mode (command)", "Режим (команда)", MODE_STATES),
     **HOLDING,
     "last_successful_read": ("Last successful read", "Останнє успішне зчитування"),
     "read_failures": ("Read failures", "Помилки зчитування"),
@@ -76,7 +82,6 @@ SENSOR = {
 
 DISCRETE = {
     "unit_on": ("Unit on", "Блок увімкнено"),
-    "winter": ("Winter (heating)", "Зима (опалення)"),
     "economy_on": ("Economy active", "Економ активний"),
     "anti_freeze_on": ("Anti-freeze active", "Антизамерзання активне"),
     "alarm": ("Alarm", "Аварія"),
@@ -104,14 +109,13 @@ DISCRETE = {
 
 COIL = {
     "power": ("Power", "Живлення"),
-    "winter_mode": ("Winter mode (heating)", "Зимовий режим (опалення)"),
     "economy": ("Economy", "Економ"),
     "anti_freeze": ("Anti-freeze", "Антизамерзання"),
     "electric_heater": ("Electric heater", "Електронагрівач"),
     "modulating_fan_auto": ("Modulating fan auto", "Авто модульованого вентилятора"),
     "master_power": ("On/off from master", "Увімкнення від майстра"),
     "master_economy": ("Economy from master", "Економ від майстра"),
-    "master_winter_mode": ("Summer/winter from master", "Літо/зима від майстра"),
+    "master_mode": ("Mode from master", "Режим від майстра"),
     "master_anti_freeze": ("Anti-freeze from master", "Антизамерзання від майстра"),
     "master_electric_heater": ("Electric heaters from master", "Електронагрівачі від майстра"),
     "master_setpoint": ("Setpoint from master", "Уставка від майстра"),
@@ -130,7 +134,7 @@ BINARY_SENSOR = {
 }
 
 NUMBER = {key: v for key, v in HOLDING.items() if key != "fan_speed"}
-SELECT = {"fan_speed": HOLDING["fan_speed"]}
+SELECT = {"mode": ("Mode", "Режим", MODE_STATES), "fan_speed": HOLDING["fan_speed"]}
 
 PREFIX_HELP = (
     "Every entity id starts with it, e.g. climate.fancoil and "
@@ -246,9 +250,9 @@ EXCEPTIONS = {
         "Адреса Modbus {slave} відповідає не як FWECSA.",
     ),
     "no_season": (
-        "The unit has not reported summer or winter yet, so it is not known which setpoint to "
-        "write.",
-        "Блок ще не повідомив літо чи зиму, тож невідомо, яку уставку записувати.",
+        "The unit has not reported heating or cooling yet, so it is not known which setpoint "
+        "to write.",
+        "Блок ще не повідомив опалення чи охолодження, тож невідомо, яку уставку записувати.",
     ),
     "hvac_mode_unavailable": (
         "{mode} is not available with the unit's summer/winter switching as set in the options.",

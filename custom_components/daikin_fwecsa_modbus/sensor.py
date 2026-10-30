@@ -1,4 +1,5 @@
-"""Sensor entities: every input register, and every holding register read-only.
+"""Sensor entities: every input register, every holding register read-only, and
+the mode -- discrete input 1 and coil 1 -- as heating or cooling.
 
 The holding registers are here as well as on the number and select platforms:
 a sensor exists with writes off, and keeps long-term statistics, which a
@@ -90,6 +91,9 @@ SENSORS: tuple[FwecsaSensorDescription, ...] = (
     _temperature("single_setpoint_status", statistics=False, entity_category=DIAGNOSTIC),
     _percent("active_humidity_setpoint", feature=HUMIDITY),
     _enum("valve_type", entity_category=DIAGNOSTIC),
+    # -- the mode: what the unit is in, and the command (coil 1, read-only) ----
+    _enum("mode_in_use"),
+    _enum("mode", entity_category=DIAGNOSTIC),
     # -- holding registers, read-only mirrors ---------------------------------
     _temperature("cooling_setpoint"),
     _limit("cooling_setpoint_min"),
