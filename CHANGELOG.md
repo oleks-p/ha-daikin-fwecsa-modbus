@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 — 2026-10-30
 
 - **Probed:** the reference unit read in full on 2026-10-30, kept as
   `tests/fixtures/fwecsa_capture.json`. The tests run the integration against

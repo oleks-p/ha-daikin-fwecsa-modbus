@@ -15,7 +15,7 @@ Not affiliated with Daikin.
 
 ## Status
 
-0.1.0 is built from the manual (FC66003946 Rev 00) and checked against the
+The integration is built from the manual (FC66003946 Rev 00) and checked against the
 reference unit (an FWB15CTV, slave 1, behind mbusd), which [the probe](#probe)
 read in full on 2026-10-30 (`tests/fixtures/fwecsa_capture.json`; the tests run
 the integration against it). Confirmed there:
