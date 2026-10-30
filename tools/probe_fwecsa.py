@@ -15,8 +15,8 @@ For each table it records:
 * one address past the documented end, to see where the unit's table stops.
 
 The capture's ``tables`` section has the same shape as
-tests/fixtures/fwecsa_reference.json, so a capture of a real unit can replace
-the synthetic fixture as it stands.
+tests/fixtures/fwecsa_reference.json, so the simulator serves a capture as it
+stands: tests/fixtures/fwecsa_capture.json is the reference unit's.
 
 Python 3.11 and pymodbus 3.6 or later.
 """

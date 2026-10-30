@@ -62,6 +62,8 @@ def _encoding(reg, enums) -> str:
         return ", ".join(f"{raw} {name}" for raw, name in enums[reg.key].items())
     if reg.scale != 1.0:
         return f"×{reg.scale:g} °C, signed"
+    if reg.key.startswith(("humidity_setpoint", "active_humidity_setpoint")):
+        return "% (whole numbers)"
     return "% (whole numbers, unverified)"
 
 

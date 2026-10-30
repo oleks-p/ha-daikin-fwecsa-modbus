@@ -1,5 +1,5 @@
 {
-  "source": "SYNTHETIC, not a probe capture. Built from the reference unit (FWB15CTV with FWECSA, slave 1, behind mbusd) where it was seen, and from the manual's defaults elsewhere. Replace with tools/probe_fwecsa.py output once the unit has been probed.",
+  "source": "SYNTHETIC: a unit built to exercise the code, with three speeds, keyboard switching and every consent on. What the reference unit (FWB15CTV with FWECSA, slave 1, behind mbusd) showed on 2026-10-29 is under observed; the rest is from the manual's defaults. The reference unit as probed on 2026-10-30 is fwecsa_capture.json, and differs where this file assumed: four speeds, the board probe, every consent off, switching on water temperature.",
   "slave": 1,
   "observed": {
     "when": "2026-10-29 18:51-19:02 UTC, through Home Assistant's YAML modbus hub",

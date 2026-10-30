@@ -13,14 +13,20 @@ What the manual does not say, and where it came from instead:
 * **Scale.** Temperatures are tenths of a degree. Measured on the reference
   unit (an FWB15CTV) on 2026-10-29: input 0 read 230 with the room at 23.0 C,
   input 2 read 290 with the water at 29.0 C, holding 6 read 230 with the
-  setpoint at 23.0. Humidity and the percentages are taken as whole numbers:
-  unverified, the reference unit has no humidity probe and a step fan.
+  setpoint at 23.0. Signed: probed on 2026-10-30, holding 0 read 0xDC00 and
+  input 10 reported 100, the minimum in holding 1, as the unit does with
+  -921.6 C. Humidity setpoints are whole percent (their limits read 35 and
+  75); room humidity and the other percentages are taken to be: unverified,
+  the reference unit has no humidity probe and its outputs were idle.
 * **Summer/winter.** Coil 1 and discrete input 1 read 1 in winter (heating):
   the reference unit read 1 while heating, and so does the i3 controller's
-  bridge of the same unit.
+  bridge of the same unit. With switching on water temperature the coil is
+  not what decides: probed, coil 1 read 0 and input 1 read 1, heating.
 * **Two-way flags** (discrete inputs 9-12 and 27). The manual gives the two
   meanings in brackets, "Speed number (3/4)"; 1 is taken to be the second.
-  Unverified: the reference unit reads them at the factory settings only.
+  The reference unit agrees for inputs 10 (0 with no hot-water probe: 2
+  pipes) and 27 (1 with the speed set to auto). Inputs 9, 11 and 12 are
+  unverified.
 * **Function codes.** The unit answers FC1-4 and writes only with FC15 and
   FC16, as the manual lists; FC5 and FC6 get no reply (measured).
 """

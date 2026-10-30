@@ -82,9 +82,9 @@ FC3 read, FC16 write. Read-only as a sensor; a number (the fan speed: a select) 
 | 5 | 4 | Winter temperature SET minimum limit | Heating setpoint minimum | ×0.1 °C, signed | `sensor.fancoil_heating_setpoint_min`<br>`number.fancoil_heating_setpoint_min` |
 | 6 | 5 | Winter temperature SET maximum limit | Heating setpoint maximum | ×0.1 °C, signed | `sensor.fancoil_heating_setpoint_max`<br>`number.fancoil_heating_setpoint_max` |
 | 7 | 6 | Single temperature SET (if SUM/WIN on water/air temp.) | Single setpoint | ×0.1 °C, signed | `sensor.fancoil_single_setpoint`<br>`number.fancoil_single_setpoint` |
-| 8 | 7 | Humidity SET | Humidity setpoint | % (whole numbers, unverified) | `sensor.fancoil_humidity_setpoint`<br>`number.fancoil_humidity_setpoint` |
-| 9 | 8 | Minimum humidity SET limit | Humidity setpoint minimum | % (whole numbers, unverified) | `sensor.fancoil_humidity_setpoint_min`<br>`number.fancoil_humidity_setpoint_min` |
-| 10 | 9 | Maximum humidity SET limit | Humidity setpoint maximum | % (whole numbers, unverified) | `sensor.fancoil_humidity_setpoint_max`<br>`number.fancoil_humidity_setpoint_max` |
+| 8 | 7 | Humidity SET | Humidity setpoint | % (whole numbers) | `sensor.fancoil_humidity_setpoint`<br>`number.fancoil_humidity_setpoint` |
+| 9 | 8 | Minimum humidity SET limit | Humidity setpoint minimum | % (whole numbers) | `sensor.fancoil_humidity_setpoint_min`<br>`number.fancoil_humidity_setpoint_min` |
+| 10 | 9 | Maximum humidity SET limit | Humidity setpoint maximum | % (whole numbers) | `sensor.fancoil_humidity_setpoint_max`<br>`number.fancoil_humidity_setpoint_max` |
 | 11 | 10 | Step ventilation speeds | Fan speed | 0 extra_low, 1 low, 2 medium, 3 high, 4 auto | `sensor.fancoil_fan_speed`<br>`select.fancoil_fan_speed` |
 | 12 | 11 | Modulating ventilation speed | Modulating fan speed | % (whole numbers, unverified) | `sensor.fancoil_modulating_fan_speed`<br>`number.fancoil_modulating_fan_speed` |
 
@@ -107,5 +107,5 @@ FC4, read-only.
 | 11 | 10 | Summer temperature SET | Cooling setpoint (status) | ×0.1 °C, signed | `sensor.fancoil_cooling_setpoint_status` |
 | 12 | 11 | Winter temperature SET | Heating setpoint (status) | ×0.1 °C, signed | `sensor.fancoil_heating_setpoint_status` |
 | 13 | 12 | Single temperature SET (if SUM/WIN on water/air temp.) | Single setpoint (status) | ×0.1 °C, signed | `sensor.fancoil_single_setpoint_status` |
-| 14 | 13 | Humidity SET on | Humidity setpoint in use | % (whole numbers, unverified) | `sensor.fancoil_active_humidity_setpoint` |
+| 14 | 13 | Humidity SET on | Humidity setpoint in use | % (whole numbers) | `sensor.fancoil_active_humidity_setpoint` |
 | 15 | 14 | Type of valve (NOT INCLUDED/ON-OFF/MODULATING) | Valve type | 0 none, 1 on_off, 2 modulating | `sensor.fancoil_valve_type` |

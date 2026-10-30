@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- **Probed:** the reference unit read in full on 2026-10-30, kept as
+  `tests/fixtures/fwecsa_capture.json`. The tests run the integration against
+  it: 4 speeds, 2 pipes, on/off valve, switching on water temperature, and a
+  cooling setpoint the unit holds as −921.6 °C shown as unknown.
+- **Simulator:** answers as the unit did. Setpoints in use are held to their
+  limits, the anti-freeze input no longer copies its enable coil, and with
+  switching on water or air the season no longer follows the coil.
+- **Docs:** what the probe settled and what it left open.
+
 ## 0.1.0 — 2026-10-29
 
 First release: every variable in the FWECSA manual (FC66003946 Rev 00) as an

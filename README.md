@@ -15,18 +15,29 @@ Not affiliated with Daikin.
 
 ## Status
 
-0.1.0 is built from the manual (FC66003946 Rev 00) and from eleven minutes of
-the reference unit (an FWB15CTV, slave 1, behind mbusd) as seen on 2026-10-29.
-Those readings confirm the addressing (manual number − 1), the temperature scale
-(tenths of a degree) and the summer/winter polarity (1 = winter). The rest of
-the table is tested against a simulator (`tools/sim_fwecsa.py`). Not yet checked
-on a unit:
+0.1.0 is built from the manual (FC66003946 Rev 00) and checked against the
+reference unit (an FWB15CTV, slave 1, behind mbusd), which [the probe](#probe)
+read in full on 2026-10-30 (`tests/fixtures/fwecsa_capture.json`; the tests run
+the integration against it). Confirmed there:
 
-- the scale of humidity and the percentages (taken as whole numbers);
-- the polarity of the two-way configuration bits (discrete inputs 10–13, 28);
-- the consent coils' exact effect (see [Writes](#writes-opt-in)).
+- the addressing (manual number − 1), and that a table read whole gives the
+  same values as reading it one at a time;
+- temperatures in signed tenths of a degree, and the unit holding a setpoint
+  to its limits: a cooling setpoint of −921.6 °C in holding 1 is in use as
+  10.0 °C, its minimum;
+- summer/winter (1 = winter), and switching on water temperature leaving the
+  summer/winter coil out of it;
+- humidity setpoints in whole percent (limits 35 and 75);
+- discrete input 11 (0 = 2 pipes) and 28 (1 = automatic fan).
 
-[The probe](#probe) settles all three in one run.
+Not yet checked on a unit:
+
+- room humidity and the analogue outputs (no humidity probe; outputs idle);
+- discrete inputs 10, 12 and 13 (speeds, fan type, regulation probe): the
+  reference unit reads 4 speeds, step fan, board probe, which nothing else
+  confirms;
+- the consent coils' exact effect (see [Writes](#writes-opt-in)). The probe
+  only reads; on the reference unit every consent is off.
 
 ## What you get
 

@@ -11,7 +11,8 @@ and FC5/FC6 -- which the unit does not answer -- come back as exception 11
 
 The unit's controller is modelled only as far as the integration can see it:
 the status inputs follow the coils that command them, and the setpoint inputs
-follow the holding registers. Python 3.11 and the standard library only.
+follow the holding registers, held to their limits. Python 3.11 and the
+standard library only.
 """
 
 from __future__ import annotations
@@ -30,10 +31,19 @@ READ_FC = {1: "coil", 2: "discrete", 3: "holding", 4: "input"}
 ILLEGAL_FUNCTION, ILLEGAL_ADDRESS, ILLEGAL_VALUE = 1, 2, 3
 GATEWAY_NO_RESPONSE = 11
 
-#: Coils the discrete inputs mirror: unit on, winter, economy, anti-freeze.
-FOLLOW_BITS = {0: 0, 1: 1, 2: 2, 3: 3}
+#: Coils the discrete inputs mirror: unit on, winter, economy. Not anti-freeze:
+#: its input says whether it is acting, and the reference unit, enabled, reads 0.
+FOLLOW_BITS = {0: 0, 1: 1, 2: 2}
 #: Holding registers the input registers mirror: the three setpoints and humidity.
 FOLLOW_WORDS = {10: 0, 11: 3, 12: 6, 13: 7}
+#: Setpoint inputs -> the holding registers of their limits. The reference unit,
+#: holding 0xDC00 (-921.6 °C) as its cooling setpoint, reports 10.0 °C, the
+#: minimum; holding 0 as its humidity setpoint, it reports 35, the minimum.
+LIMITS = {10: (1, 2), 11: (4, 5), 13: (8, 9)}
+
+
+def _signed(raw: int) -> int:
+    return raw - 0x10000 if raw & 0x8000 else raw
 
 
 class FakeFwecsa:
@@ -102,15 +112,21 @@ class FakeFwecsa:
     def follow(self) -> None:
         """The controller's side: status follows command."""
         coils, holding = self.tables["coil"], self.tables["holding"]
+        inputs = self.tables["input"]
         for di, coil in FOLLOW_BITS.items():
+            if di == 1 and self.auto_switching:
+                continue  # the water or the air decides the season, not the coil
             self.tables["discrete"][di] = coils[coil]
         for ir, hr in FOLLOW_WORDS.items():
-            self.tables["input"][ir] = holding[hr]
+            value = holding[hr]
+            if ir in LIMITS:
+                low, high = (_signed(holding[i]) for i in LIMITS[ir])
+                value = min(max(_signed(value), low), high) & 0xFFFF
+            inputs[ir] = value
         if self.auto_switching:
-            active = holding[6]
+            inputs[9] = inputs[12]
         else:
-            active = holding[3] if self.tables["discrete"][1] else holding[0]
-        self.tables["input"][9] = active
+            inputs[9] = inputs[11] if self.tables["discrete"][1] else inputs[10]
 
 
 # -- Modbus TCP --------------------------------------------------------------------
