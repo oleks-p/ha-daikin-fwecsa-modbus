@@ -93,6 +93,18 @@ async def test_retired_entities_are_removed(hass, config_entry, modbus_clients, 
     assert hass.states.get("sensor.fancoil_mode_in_use").state == "heating"
 
 
+#: What Home Assistant's Security view lists from binary sensors, besides
+#: diagnostic tamper sensors (frontend 2026.10).
+SECURITY_CLASSES = {"lock", "door", "window", "garage_door", "opening", "carbon_monoxide",
+                    "gas", "glass_break", "moisture", "safety", "smoke", "tamper"}
+
+
+async def test_nothing_is_listed_as_security(hass, writes_on, setup_integration):
+    # The valve was an "opening", so the Security view showed it beside the doors.
+    for state in hass.states.async_all("binary_sensor"):
+        assert state.attributes.get("device_class") not in SECURITY_CLASSES, state.entity_id
+
+
 async def test_device(hass, setup_integration):
     device = dr.async_get(hass).async_get_device(
         identifiers={(DOMAIN, setup_integration.entry_id)})

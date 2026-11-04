@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 — 2026-11-04
+
+- **Valve off the Security view:** `binary_sensor.fancoil_valve_open` no
+  longer has the "opening" device class. Home Assistant's Security view lists
+  every binary sensor of that class, so it showed the water valve as if it were
+  a door. It still reads Open or Closed, from its own translations.
+
 ## 0.1.2 — 2026-10-30
 
 - **Mode, not winter:** coil 1 and discrete input 1, the manual's

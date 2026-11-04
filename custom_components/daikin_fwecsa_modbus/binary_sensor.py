@@ -76,7 +76,9 @@ BINARY_SENSORS: tuple[FwecsaBinaryDescription, ...] = (
     _config("water_probe_present"),
     _config("hot_water_probe_present"),
     _bit("dehumidifying", device_class=RUNNING),
-    _bit("valve_open", device_class=BinarySensorDeviceClass.OPENING),
+    # No OPENING class: Home Assistant's Security view lists those, as it would
+    # a door. Open and closed come from the translations instead.
+    _bit("valve_open"),
     _bit("off_by_contact"),
     _bit("fan_auto_mode"),
     _bit("heater_on", device_class=RUNNING),

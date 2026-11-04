@@ -31,6 +31,10 @@ MODE_STATES = {
     "heating": ("Heating", "Опалення"),
     "cooling": ("Cooling", "Охолодження"),
 }
+VALVE_STATES = {
+    "on": ("Open", "Відкрито"),
+    "off": ("Closed", "Закрито"),
+}
 FAN_STATUS_STATES = {
     "off": ("Off", "Вимкнено"),
     **{k: v for k, v in FAN_SPEED_STATES.items() if k != "auto"},
@@ -99,7 +103,7 @@ DISCRETE = {
     "water_probe_present": ("Water probe fitted", "Датчик води встановлено"),
     "hot_water_probe_present": ("Hot water probe fitted", "Датчик гарячої води встановлено"),
     "dehumidifying": ("Dehumidifying", "Осушення"),
-    "valve_open": ("Valve", "Клапан"),
+    "valve_open": ("Valve", "Клапан", VALVE_STATES),
     "off_by_contact": ("Off by remote contact", "Вимкнено віддаленим контактом"),
     "fan_auto_mode": ("Automatic fan", "Автоматичний вентилятор"),
     "heater_on": ("Heater", "Нагрівач"),

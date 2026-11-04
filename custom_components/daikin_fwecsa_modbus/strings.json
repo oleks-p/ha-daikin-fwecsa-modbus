@@ -345,7 +345,11 @@
         "name": "Dehumidifying"
       },
       "valve_open": {
-        "name": "Valve"
+        "name": "Valve",
+        "state": {
+          "on": "Open",
+          "off": "Closed"
+        }
       },
       "off_by_contact": {
         "name": "Off by remote contact"
