@@ -73,7 +73,11 @@ async def async_setup_entry(
 class FwecsaClimate(FwecsaEntity, ClimateEntity):
     entity_description: FwecsaClimateDescription
     _attr_name = None  # the device's name
-    _attr_temperature_unit = UnitOfTemperature.CELSIUS
+    # Home Assistant 2026.11 reads the `native_` names and deprecates the
+    # others; the older releases this still supports read only those. With
+    # both on the class, 2026.11 uses the native ones and warns of nothing.
+    _attr_native_temperature_unit = UnitOfTemperature.CELSIUS
+    _attr_temperature_unit = _attr_native_temperature_unit
     _attr_precision = 0.1
     _attr_target_temperature_step = 0.5
 
@@ -156,20 +160,22 @@ class FwecsaClimate(FwecsaEntity, ClimateEntity):
         return (values.get("modulating_fan_output") or 0) > 0
 
     @property
-    def current_temperature(self) -> float | None:
+    def native_current_temperature(self) -> float | None:
         return self._values.get("room_temperature")
+    current_temperature = native_current_temperature
 
     @property
     def current_humidity(self) -> float | None:
         return self._values.get("room_humidity") if self._humidity else None
 
     @property
-    def target_temperature(self) -> float | None:
+    def native_target_temperature(self) -> float | None:
         active = self._values.get("active_setpoint")
         if active is not None:
             return active
         key = self._setpoint_key()
         return self._values.get(key) if key else None
+    target_temperature = native_target_temperature
 
     @property
     def min_temp(self) -> float:

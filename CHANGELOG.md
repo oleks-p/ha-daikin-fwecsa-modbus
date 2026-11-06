@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.4 — 2026-11-06
+
+- **Home Assistant 2026.11:** the climate entity provides the native
+  temperature API (`native_current_temperature`, `native_target_temperature`,
+  `_attr_native_temperature_unit`), so 2026.11 no longer warns that it stops
+  working in 2027.11. The old names stay as aliases for the releases before
+  2026.11.
+
 ## 0.1.3 — 2026-11-04
 
 - **Valve off the Security view:** `binary_sensor.fancoil_valve_open` no
